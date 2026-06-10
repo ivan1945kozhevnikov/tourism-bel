@@ -43,12 +43,6 @@ const Login: React.FC = () => {
     useState('Нет аккаунта?');
   const [translatedRegister, setTranslatedRegister] =
     useState('Зарегистрироваться');
-  const [translatedDemoTitle, setTranslatedDemoTitle] = useState(
-    'Демо-данные для входа:',
-  );
-  const [translatedAdminDemo, setTranslatedAdminDemo] = useState(
-    'Admin: admin@belarus.by / admin123',
-  );
   const [translatedLoginError, setTranslatedLoginError] =
     useState('Ошибка входа');
   const [translatedLanguageRu, setTranslatedLanguageRu] = useState('Русский');
@@ -56,7 +50,7 @@ const Login: React.FC = () => {
   const [translatedLanguageBe, setTranslatedLanguageBe] =
     useState('Беларуская');
 
-  // Перевод статических текстов
+  // Перевод статических текстов (без демо-данных)
   useEffect(() => {
     const translateStaticTexts = async () => {
       const translations = await Promise.all([
@@ -69,8 +63,6 @@ const Login: React.FC = () => {
         translateText('Вход...'),
         translateText('Нет аккаунта?'),
         translateText('Зарегистрироваться'),
-        translateText('Демо-данные для входа:'),
-        translateText('Admin: admin@belarus.by / admin123'),
         translateText('Ошибка входа'),
         translateText('Русский'),
         translateText('English'),
@@ -87,8 +79,6 @@ const Login: React.FC = () => {
       setTranslatedLoggingIn(translations[idx++]);
       setTranslatedNoAccount(translations[idx++]);
       setTranslatedRegister(translations[idx++]);
-      setTranslatedDemoTitle(translations[idx++]);
-      setTranslatedAdminDemo(translations[idx++]);
       setTranslatedLoginError(translations[idx++]);
       setTranslatedLanguageRu(translations[idx++]);
       setTranslatedLanguageEn(translations[idx++]);
@@ -245,11 +235,6 @@ const Login: React.FC = () => {
             >
               {translatedRegister}
             </Link>
-          </div>
-
-          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl text-sm text-gray-600 border border-blue-100">
-            <p className="font-medium text-blue-800">{translatedDemoTitle}</p>
-            <p className="mt-1">{translatedAdminDemo}</p>
           </div>
         </CardContent>
       </Card>
