@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "user_id": null,
+    "user_name": "Ivan Kozevnikov",
+    "user_email": "kozhevnikovivan86@gmail.com",
+    "subject": "ааааааааа",
+    "message": "ааааааааааааа",
+    "status": "responded",
+    "admin_response": "исправлено",
+    "created_at": "2026-04-20 07:12:30.963",
+    "responded_at": "2026-04-20 07:12:46.670"
+  }
+]

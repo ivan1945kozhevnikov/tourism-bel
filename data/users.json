@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "email": "admin@belarus.by",
+    "password": "$2b$10$eqoutyscVku3M84PALpZQuJarBSKAb4BW1XY8Xxc4u120BdCBPNE6",
+    "first_name": "Admin",
+    "last_name": "User",
+    "role": "admin",
+    "created_at": "2026-03-05 14:32:53.340",
+    "is_blocked": 0,
+    "updated_at": "2026-06-10 09:11:37.663"
+  },
+  {
+    "id": 2,
+    "email": "kozhevnikovivan86@gmail.com",
+    "password": "$2b$10$uXSnq74fIptMKnbGKTFrl.cc8V9JFB45XbCxEuSQ9JlwDDrXY067C",
+    "first_name": "Ivan",
+    "last_name": "Kozevnikov",
+    "role": "user",
+    "created_at": "2026-04-15 15:50:16.360",
+    "is_blocked": 0,
+    "updated_at": "2026-06-10 09:11:57.557"
+  }
+]

@@ -1,0 +1,151 @@
+{
+  "voice": {
+    "help": "I am a voice assistant for tourism in Belarus. I can tell you about attractions. Say, for example: Tell me about Mir Castle or What is Nesvizh Castle",
+    "enabled": "Voice guidance enabled",
+    "disabled": "Voice guidance disabled"
+  },
+  "header": {
+    "home": "Home",
+    "map": "Map",
+    "tours": "Tours",
+    "traditions": "Traditions",
+    "legends": "Legends",
+    "food": "Cuisine",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile",
+    "admin": "Admin Panel"
+  },
+  "footer": {
+    "navigation": "Navigation",
+    "for_users": "For Users",
+    "contacts": "Contacts",
+    "rights": "All rights reserved"
+  },
+  "home": {
+    "welcome": "Welcome to Belarus",
+    "title": "Discover",
+    "country": "Belarus",
+    "subtitle": "A land of clean lakes, ancient castles and centuries-old traditions. Travel with us through the most beautiful places of Belarus.",
+    "start": "Start journey",
+    "explore": "Explore map",
+    "what_we_offer": "What we offer",
+    "what_we_offer_desc": "Discover all facets of Belarus through our unique services",
+    "popular": "Popular destinations",
+    "popular_desc": "The most visited places not to be missed",
+    "testimonials": "Testimonials",
+    "testimonials_desc": "What our travelers say",
+    "suggestions": "Have suggestions?",
+    "suggestions_desc": "We are always happy to hear your opinion! Tell us what can be improved.",
+    "ready": "Ready to start your journey?",
+    "ready_desc": "Join thousands of tourists who have already discovered the beauty of Belarus.",
+    "register": "Register"
+  },
+  "hero": {
+    "mir_castle": "Mir Castle",
+    "mir_subtitle": "UNESCO World Heritage Site"
+  },
+  "testimonials_names": {
+    "name1": "Anna Petrova",
+    "name2": "Sergey Ivanov",
+    "name3": "Elena Kozlova"
+  },
+  "slider": {
+    "mir_castle": "Mir Castle",
+    "mir_subtitle": "UNESCO World Heritage Site",
+    "mir_desc": "Unique architectural ensemble of the XVI-XVII centuries",
+    "nesvizh_castle": "Nesvizh Castle",
+    "nesvizh_subtitle": "Residence of the Radziwill princes",
+    "nesvizh_desc": "A pearl of Belarusian Renaissance architecture",
+    "pushcha": "Belovezhskaya Pushcha",
+    "pushcha_subtitle": "The oldest reserve in Europe",
+    "pushcha_desc": "Home of bison and ancient forest preserved since prehistoric times",
+    "brest_fortress": "Brest Fortress",
+    "brest_subtitle": "Hero Fortress",
+    "brest_desc": "Symbol of courage and fortitude of Soviet soldiers",
+    "grodno_castle": "Grodno Castle",
+    "grodno_subtitle": "Old castle of the XIV century",
+    "grodno_desc": "Residence of the Grand Dukes of Lithuania",
+    "sophia": "Saint Sophia Cathedral",
+    "sophia_subtitle": "Polotsk, XI century",
+    "sophia_desc": "One of the oldest churches in Eastern Europe"
+  },
+  "testimonials": {
+    "1": "An unforgettable journey! Top-notch organization. I will definitely come back!",
+    "2": "Great service, convenient website. Booked a tour in 5 minutes. Thank you!",
+    "3": "Excellent guides, interesting routes. Belarus has won me over!"
+  },
+  "features": {
+    "map": "Interactive Map",
+    "map_desc": "Explore Belarus attractions with voice assistant",
+    "tours": "Tours and excursions",
+    "tours_desc": "Book exciting tours to the most beautiful places",
+    "traditions": "Traditions and culture",
+    "traditions_desc": "Learn about rich traditions and customs",
+    "food": "National cuisine",
+    "food_desc": "Discover delicious Belarusian cuisine with recipes",
+    "legends": "Legends of Belarus",
+    "legends_desc": "Ancient legends and myths passed down through generations"
+  },
+  "stats": {
+    "landmarks": "Landmarks",
+    "castles": "Castles and estates",
+    "unesco": "UNESCO sites",
+    "tourists": "Happy tourists"
+  },
+  "buttons": {
+    "details": "Details",
+    "send": "Send",
+    "sending": "Sending...",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "feedback": {
+    "name": "Your name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "thanks": "Thank you for your feedback!",
+    "thanks_text": "We will definitely consider your suggestion.",
+    "help_develop": "Your ideas help us grow",
+    "answer_all": "We answer all messages",
+    "best_chosen": "We bring the best suggestions to life"
+  },
+  "map": {
+    "title": "Interactive Map of Belarus",
+    "voice_assistant": "Voice Assistant",
+    "select_marker": "Select a marker on the map",
+    "description": "Description",
+    "history": "History"
+  },
+  "tours": {
+    "title": "Tours and excursions",
+    "book": "Book now",
+    "route": "Route",
+    "duration": "Duration",
+    "price": "Price"
+  },
+  "traditions": {
+    "title": "Traditions and culture of Belarus"
+  },
+  "legends": {
+    "title": "Legends of Belarus"
+  },
+  "food": {
+    "title": "National cuisine of Belarus"
+  },
+  "profile": {
+    "title": "My profile",
+    "my_bookings": "My bookings"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "first_name": "First name",
+    "last_name": "Last name"
+  }
+}
