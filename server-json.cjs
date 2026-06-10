@@ -1018,36 +1018,51 @@ app.get('/api/bookings/my', authenticateToken, async (req, res) => {
 
 app.post('/api/bookings', authenticateToken, async (req, res) => {
   try {
-    const { tour_id, booking_date, participants, departure_location } =
-      req.body;
+    console.log('POST /api/bookings - Request body:', req.body);
+
+    // Принимаем оба варианта названий полей
+    const tourId = req.body.tourId || req.body.tour_id;
+    const bookingDate = req.body.bookingDate || req.body.booking_date;
+    const participants = req.body.participants || 1;
+    const departureLocation =
+      req.body.departureLocation || req.body.departure_location;
+
+    if (!tourId || !bookingDate) {
+      return res
+        .status(400)
+        .json({ message: 'tourId and bookingDate are required' });
+    }
+
     const tours = readJSON('tours.json');
-    const tour = tours.find((t) => t.id === tour_id);
+    const tour = tours.find((t) => t.id === tourId);
 
     if (!tour) {
       return res.status(404).json({ message: 'Tour not found' });
     }
 
     const bookings = readJSON('bookings.json');
-    const total_price = tour.price * (participants || 1);
+    const totalPrice = tour.price * participants;
 
     const newBooking = {
       id: getNextId(bookings),
       user_id: req.user.id,
-      tour_id: tour_id,
-      booking_date: booking_date,
-      participants: participants || 1,
-      total_price: total_price,
+      tour_id: tourId,
+      booking_date: bookingDate,
+      participants: participants,
+      total_price: totalPrice,
       status: 'pending',
-      departure_location: departure_location || null,
+      departure_location: departureLocation || null,
       created_at: new Date().toISOString().replace('T', ' ').slice(0, 23),
     };
 
     bookings.push(newBooking);
     writeJSON('bookings.json', bookings);
+
+    console.log('✅ Booking created:', newBooking);
     res.status(201).json(newBooking);
   } catch (error) {
     console.error('Create booking error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

@@ -15,7 +15,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetClose,
+} from '@/components/ui/sheet';
 import {
   User,
   Map,
@@ -166,19 +172,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             : 'bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900'
         }`}
       >
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
+          <div className="flex items-center justify-between gap-2">
             {/* Logo */}
-            <Link to="/" className="flex items-center group">
+            <Link to="/" className="flex items-center group flex-shrink-0">
               <div className="relative">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
                     scrolled
                       ? 'bg-gradient-to-br from-blue-500 to-cyan-500 shadow-md'
                       : 'bg-white/20 backdrop-blur-sm border border-white/30'
                   }`}
                 >
-                  <Compass className="w-5 h-5 transition-all duration-300 text-white" />
+                  <Compass className="w-4 h-4 sm:w-5 sm:h-5 transition-all duration-300 text-white" />
                 </div>
               </div>
             </Link>
@@ -191,7 +197,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     <NavigationMenuLink asChild>
                       <Link
                         to={item.path}
-                        className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        className={`flex items-center px-3 lg:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                           isActive(item.path)
                             ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
                             : scrolled
@@ -199,7 +205,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                               : 'text-white/90 hover:bg-white/20 hover:text-white'
                         }`}
                       >
-                        <item.icon className="w-4 h-4 mr-2" />
+                        <item.icon className="w-4 h-4 mr-1 lg:mr-2" />
                         {item.label}
                       </Link>
                     </NavigationMenuLink>
@@ -209,7 +215,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </NavigationMenu>
 
             {/* Right side */}
-            <div className="flex items-center space-x-3 min-w-[320px] justify-end">
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3 min-w-[auto] sm:min-w-[320px] justify-end">
               <div
                 className={
                   scrolled
@@ -217,7 +223,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     : ''
                 }
               >
-                <AccessibilityWidget />
+                {/* Передаем текущий язык в виджет */}
+                <AccessibilityWidget currentLanguage={i18n.language} />
               </div>
 
               {isAuthenticated ? (
@@ -225,26 +232,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                      className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 rounded-lg transition-all duration-200 ${
                         scrolled
                           ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           : 'text-white hover:bg-white/20'
                       }`}
                     >
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-sm font-bold">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-xs sm:text-sm font-bold">
                           {user?.firstName?.[0]}
                           {user?.lastName?.[0]}
                         </span>
                       </div>
-                      <span className="hidden sm:inline text-sm font-medium min-w-[60px]">
+                      <span className="hidden sm:inline text-sm font-medium min-w-[40px] sm:min-w-[60px]">
                         {user?.firstName}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-56 mt-2 rounded-xl"
+                    className="w-48 sm:w-56 mt-2 rounded-xl"
                   >
                     {isAdmin && (
                       <DropdownMenuItem
@@ -252,8 +259,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         className="cursor-pointer rounded-lg"
                       >
                         <Settings className="w-4 h-4 mr-2" />
-                        {translatedAdmin}
-                        <span className="ml-auto bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs px-2 py-0.5 rounded-full">
+                        <span className="whitespace-normal break-words max-w-[120px] sm:max-w-none">
+                          {translatedAdmin}
+                        </span>
+                        <span className="ml-auto bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs px-2 py-0.5 rounded-full whitespace-nowrap">
                           ADMIN
                         </span>
                       </DropdownMenuItem>
@@ -275,11 +284,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <Button
                     variant="ghost"
                     onClick={() => navigate('/login')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                       scrolled
                         ? 'text-gray-700 hover:bg-gray-100'
                         : 'text-white hover:bg-white/20'
@@ -289,7 +298,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </Button>
                   <Button
                     onClick={() => navigate('/register')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md ${
+                    className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 shadow-md ${
                       scrolled
                         ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
                         : 'bg-white text-blue-600 hover:bg-gray-100'
@@ -306,43 +315,46 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`lg:hidden rounded-lg transition-all duration-200 ${
+                    className={`lg:hidden rounded-lg transition-all duration-200 w-8 h-8 sm:w-9 sm:h-9 ${
                       scrolled
                         ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         : 'text-white hover:bg-white/20'
                     }`}
                   >
-                    <Menu className="w-5 h-5" />
+                    <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-80 p-0">
-                  <div className="flex flex-col pt-20 pb-6">
-                    <div className="px-4 space-y-1">
+                <SheetContent side="right" className="w-72 sm:w-80 p-0">
+                  <SheetTitle className="sr-only">Меню навигации</SheetTitle>
+
+                  <div className="flex flex-col pt-16 sm:pt-20 pb-6">
+                    <div className="px-3 sm:px-4 space-y-1">
                       {navItems.map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          onClick={() => document.body.click()}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
-                            isActive(item.path)
-                              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          <item.icon className="w-5 h-5" />
-                          {item.label}
+                        <Link key={item.path} to={item.path}>
+                          <SheetClose asChild>
+                            <div
+                              className={`flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all duration-200 cursor-pointer ${
+                                isActive(item.path)
+                                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                                  : 'text-gray-700 hover:bg-gray-100'
+                              }`}
+                            >
+                              <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                              {item.label}
+                            </div>
+                          </SheetClose>
                         </Link>
                       ))}
                     </div>
                     {isAdmin && (
-                      <div className="px-4 mt-2">
-                        <Link
-                          to="/admin"
-                          onClick={() => document.body.click()}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md"
-                        >
-                          <Settings className="w-5 h-5" />
-                          {translatedAdmin}
+                      <div className="px-3 sm:px-4 mt-2">
+                        <Link to="/admin">
+                          <SheetClose asChild>
+                            <div className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md cursor-pointer">
+                              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                              {translatedAdmin}
+                            </div>
+                          </SheetClose>
                         </Link>
                       </div>
                     )}
@@ -355,30 +367,34 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow pt-16">{children}</main>
+      <main className="flex-grow pt-14 sm:pt-16">{children}</main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                  <Compass className="w-5 h-5 text-white" />
+      <footer className="bg-gray-900 text-white py-8 sm:py-12">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div className="text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start space-x-2 mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                  <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">Беларусь Туризм</span>
+                <span className="text-lg sm:text-xl font-bold">
+                  Беларусь Туризм
+                </span>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto sm:mx-0">
                 {translatedWelcome}
               </p>
             </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">{translatedNavigation}</h3>
-              <ul className="space-y-2 text-gray-400">
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">
+                {translatedNavigation}
+              </h3>
+              <ul className="space-y-1.5 sm:space-y-2 text-gray-400">
                 <li>
                   <Link
                     to="/"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedHome}
                   </Link>
@@ -386,7 +402,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/map"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedMap}
                   </Link>
@@ -394,7 +410,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/tours"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedTours}
                   </Link>
@@ -402,7 +418,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/traditions"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedTraditions}
                   </Link>
@@ -410,7 +426,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/legends"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedLegends}
                   </Link>
@@ -418,7 +434,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/food"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedFood}
                   </Link>
@@ -426,20 +442,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/reviews"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedReviews}
                   </Link>
                 </li>
               </ul>
             </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">{translatedForUsers}</h3>
-              <ul className="space-y-2 text-gray-400">
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">
+                {translatedForUsers}
+              </h3>
+              <ul className="space-y-1.5 sm:space-y-2 text-gray-400">
                 <li>
                   <Link
                     to="/login"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedLogin}
                   </Link>
@@ -447,7 +465,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/register"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedRegister}
                   </Link>
@@ -455,24 +473,28 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <li>
                   <Link
                     to="/profile"
-                    className="hover:text-cyan-400 transition-colors"
+                    className="text-xs sm:text-sm hover:text-cyan-400 transition-colors"
                   >
                     {translatedProfile}
                   </Link>
                 </li>
               </ul>
             </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">{translatedContacts}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">
+                {translatedContacts}
+              </h3>
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
                 Email: info@belarustourism.by
-                <br />
-                Телефон: +375 (17) 123-45-67
+                <br className="hidden sm:inline" />
+                <span className="block sm:inline">
+                  Телефон: +375 (17) 123-45-67
+                </span>
               </p>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-            © 2024 Беларусь Туризм. {translatedRights}
+          <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-500 text-xs sm:text-sm">
+            © 2026 Беларусь Туризм. {translatedRights}
           </div>
         </div>
       </footer>

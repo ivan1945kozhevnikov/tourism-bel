@@ -154,9 +154,11 @@ const Reviews: React.FC = () => {
   const fetchReviews = async () => {
     try {
       const res = await reviewsAPI.getAll();
-      // Показываем только одобренные отзывы
+      // Показываем только одобренные отзывы (is_approved = 1 или true)
       const approved = Array.isArray(res.data)
-        ? res.data.filter((r: any) => r.is_approved === true)
+        ? res.data.filter(
+            (r: any) => r.is_approved === 1 || r.is_approved === true,
+          )
         : [];
       setReviews(approved);
       setTranslatedReviews(approved);

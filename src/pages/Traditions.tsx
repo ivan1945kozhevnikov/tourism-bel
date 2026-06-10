@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
   Music,
@@ -18,18 +17,13 @@ import {
   ArrowRight,
   Star,
   Clock,
-  Utensils,
-  Gift,
-  ChevronRight,
   Loader2,
   Info,
-  History,
 } from 'lucide-react';
 import VoiceReader from '@/components/VoiceReader';
 import { useTranslation } from 'react-i18next';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 
 interface Tradition {
   id: number;
@@ -45,9 +39,8 @@ interface Tradition {
 const Traditions: React.FC = () => {
   const { i18n } = useTranslation();
   const { translateText, translateArray } = useAutoTranslate();
-  const navigate = useNavigate();
 
-  const [traditions, setTraditions] = useState<Tradition[]>([]);
+  const [originalTraditions, setOriginalTraditions] = useState<Tradition[]>([]);
   const [translatedTraditions, setTranslatedTraditions] = useState<Tradition[]>(
     [],
   );
@@ -95,27 +88,18 @@ const Traditions: React.FC = () => {
   const [translatedCalendarTitle, setTranslatedCalendarTitle] = useState(
     'Календарь праздников',
   );
-  const [translatedTraditionsTitle, setTranslatedTraditionsTitle] =
-    useState('Традиции и обряды');
-  const [translatedFoodsTitle, setTranslatedFoodsTitle] =
-    useState('Традиционные блюда');
-  const [translatedViewRecipe, setTranslatedViewRecipe] =
-    useState('Смотреть рецепт');
   const [translatedMonths, setTranslatedMonths] = useState<string[]>([]);
   const [translatedNoHolidays, setTranslatedNoHolidays] = useState(
     'В этом месяце нет народных праздников',
   );
-  const [translatedHolidayTraditions, setTranslatedHolidayTraditions] =
-    useState('Традиции и обряды');
   const [translatedDescription, setTranslatedDescription] =
     useState('Содержание');
-  const [translatedOrigin, setTranslatedOrigin] = useState('Происхождение');
-  const [translatedClose, setTranslatedClose] = useState('Закрыть');
 
   const [translatedCategories, setTranslatedCategories] = useState<
     Record<string, string>
   >({});
-  const [activeTab, setActiveTab] = useState<string>('');
+  const [selectedTab, setSelectedTab] = useState<string>('');
+  const selectedTabRef = useRef<string>('');
 
   // Функция для получения даты из традиции
   const getHolidayDate = (
@@ -158,7 +142,7 @@ const Traditions: React.FC = () => {
 
   // Поиск ближайшего праздника
   const findNextHoliday = () => {
-    if (traditions.length === 0) return null;
+    if (originalTraditions.length === 0) return null;
 
     const today = new Date();
     let nearest: Tradition | null = null;
@@ -166,7 +150,7 @@ const Traditions: React.FC = () => {
     let minDiff = Infinity;
     let nearestMonth = 0;
 
-    for (const tradition of traditions) {
+    for (const tradition of originalTraditions) {
       const dateInfo = getHolidayDate(tradition);
       if (!dateInfo) continue;
 
@@ -198,11 +182,11 @@ const Traditions: React.FC = () => {
       setLoading(true);
       const response = await traditionsAPI.getAll();
       const data = response.data || [];
-      setTraditions(data);
+      setOriginalTraditions(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching traditions:', error);
-      setTraditions([]);
+      setOriginalTraditions([]);
       setLoading(false);
     }
   };
@@ -210,8 +194,8 @@ const Traditions: React.FC = () => {
   // Перевод традиций при смене языка
   useEffect(() => {
     const translateAllTraditions = async () => {
-      if (traditions.length > 0) {
-        const translated = await translateArray(traditions, [
+      if (originalTraditions.length > 0) {
+        const translated = await translateArray(originalTraditions, [
           'title',
           'description',
         ]);
@@ -219,20 +203,22 @@ const Traditions: React.FC = () => {
       }
     };
     translateAllTraditions();
-  }, [traditions, i18n.language]);
+  }, [originalTraditions, i18n.language]);
 
   // Перевод категорий
   useEffect(() => {
     const translateCategories = async () => {
-      const uniqueCategories = [...new Set(traditions.map((t) => t.category))];
+      const uniqueCategories = [
+        ...new Set(originalTraditions.map((t) => t.category)),
+      ];
       const translations: Record<string, string> = {};
       for (const cat of uniqueCategories) {
         translations[cat] = await translateText(cat);
       }
       setTranslatedCategories(translations);
     };
-    if (traditions.length > 0) translateCategories();
-  }, [traditions, i18n.language, translateText]);
+    if (originalTraditions.length) translateCategories();
+  }, [originalTraditions, i18n.language, translateText]);
 
   useEffect(() => {
     fetchTraditions();
@@ -240,7 +226,7 @@ const Traditions: React.FC = () => {
 
   // Основной эффект для таймера
   useEffect(() => {
-    if (traditions.length === 0) return;
+    if (originalTraditions.length === 0) return;
 
     const updateTimer = () => {
       const result = findNextHoliday();
@@ -286,17 +272,17 @@ const Traditions: React.FC = () => {
         clearInterval(timerRef.current);
       }
     };
-  }, [traditions]);
+  }, [originalTraditions]);
 
   // Автоматическое переключение календаря
   useEffect(() => {
-    if (traditions.length > 0) {
+    if (originalTraditions.length > 0) {
       const result = findNextHoliday();
       if (result && result.month) {
         setSelectedMonth(result.month);
       }
     }
-  }, [traditions]);
+  }, [originalTraditions]);
 
   // Перевод месяцев
   useEffect(() => {
@@ -339,14 +325,8 @@ const Traditions: React.FC = () => {
         translateText('минут'),
         translateText('секунд'),
         translateText('Календарь праздников'),
-        translateText('Традиции и обряды'),
-        translateText('Традиционные блюда'),
-        translateText('Смотреть рецепт'),
         translateText('В этом месяце нет народных праздников'),
-        translateText('Традиции и обряды'),
         translateText('Содержание'),
-        translateText('Происхождение'),
-        translateText('Закрыть'),
       ]);
       let i = 0;
       setTranslatedHeroBadge(translations[i++]);
@@ -362,14 +342,8 @@ const Traditions: React.FC = () => {
       setTranslatedMinutes(translations[i++]);
       setTranslatedSeconds(translations[i++]);
       setTranslatedCalendarTitle(translations[i++]);
-      setTranslatedTraditionsTitle(translations[i++]);
-      setTranslatedFoodsTitle(translations[i++]);
-      setTranslatedViewRecipe(translations[i++]);
       setTranslatedNoHolidays(translations[i++]);
-      setTranslatedHolidayTraditions(translations[i++]);
       setTranslatedDescription(translations[i++]);
-      setTranslatedOrigin(translations[i++]);
-      setTranslatedClose(translations[i++]);
     };
     translateStaticTexts();
   }, [i18n.language, translateText]);
@@ -396,7 +370,9 @@ const Traditions: React.FC = () => {
   };
 
   const getDisplayCategories = () => {
-    const uniqueCategories = [...new Set(traditions.map((t) => t.category))];
+    const uniqueCategories = [
+      ...new Set(originalTraditions.map((t) => t.category)),
+    ];
     return [
       translatedAll,
       ...uniqueCategories.map((cat) => translatedCategories[cat] || cat),
@@ -414,12 +390,26 @@ const Traditions: React.FC = () => {
   };
 
   const getHolidaysByMonth = (month: number): Tradition[] => {
-    return traditions.filter((t) => {
+    return originalTraditions.filter((t) => {
       const dateInfo = getHolidayDate(t);
       if (!dateInfo) return false;
       return dateInfo.month === month;
     });
   };
+
+  // Восстановление выбранной категории при смене языка
+  useEffect(() => {
+    if (selectedTab) {
+      selectedTabRef.current = selectedTab;
+    }
+  }, [selectedTab]);
+
+  // Ключевое исправление: при смене языка обновляем selectedTab на translatedAll
+  useEffect(() => {
+    if (translatedAll) {
+      setSelectedTab(translatedAll);
+    }
+  }, [translatedAll]);
 
   if (loading) {
     return (
@@ -430,12 +420,11 @@ const Traditions: React.FC = () => {
   }
 
   const displayTraditions =
-    translatedTraditions.length > 0 ? translatedTraditions : traditions;
+    translatedTraditions.length > 0 ? translatedTraditions : originalTraditions;
   const displayCategories = getDisplayCategories();
-  const holidaysWithDates = traditions.filter(
+  const holidaysWithDates = originalTraditions.filter(
     (t) => getHolidayDate(t) !== null,
   );
-  const currentTab = activeTab || displayCategories[0] || 'Все';
 
   const nextHolidayTranslated = nextHoliday
     ? displayTraditions.find((t) => t.id === nextHoliday.id) || nextHoliday
@@ -450,79 +439,78 @@ const Traditions: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <style>{`
-        .custom-scroll::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 10px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
-      `}</style>
-
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-20">
+      {/* Hero Section - адаптивная */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16 md:py-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1920')] bg-cover bg-center opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/50" />
         </div>
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-blue-400" />
-            <span className="text-white/90 text-sm">{translatedHeroBadge}</span>
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-4 sm:mb-6">
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
+            <span className="text-white/90 text-xs sm:text-sm">
+              {translatedHeroBadge}
+            </span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6">
             {translatedHeroTitle}
             <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
               {' '}
               {translatedHeroTitleHigh}
             </span>
           </h1>
-          <p className="text-xl text-white/80 max-w-3xl mx-auto">
+          <p className="text-base sm:text-xl text-white/80 max-w-3xl mx-auto px-4">
             {translatedHeroSubtitle}
           </p>
         </div>
       </section>
 
-      {/* Таймер до ближайшего праздника */}
+      {/* Таймер до ближайшего праздника - адаптивный */}
       {nextHolidayTranslated && (
-        <div className="container mx-auto px-4 -mt-8 relative z-20">
-          <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 rounded-2xl shadow-xl overflow-hidden">
-            <div className="px-6 py-4 text-white text-center">
-              <h3 className="text-lg font-semibold flex items-center justify-center gap-2">
-                <Clock className="w-5 h-5" />
+        <div className="container mx-auto px-3 sm:px-4 -mt-8 sm:-mt-12 relative z-20">
+          <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 text-white text-center">
+              <h3 className="text-base sm:text-lg font-semibold flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                 {translatedNextHoliday}: {nextHolidayTranslated.title}
               </h3>
-              <div className="flex justify-center gap-4 mt-3 text-center">
-                <div className="bg-white/20 rounded-xl px-4 py-2 min-w-[70px]">
-                  <div className="text-3xl font-bold">{timeLeft.days}</div>
-                  <div className="text-xs">{translatedDays}</div>
+              <div className="flex justify-center gap-2 sm:gap-4 mt-3 text-center">
+                <div className="bg-white/20 rounded-lg sm:rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 min-w-[55px] sm:min-w-[70px]">
+                  <div className="text-xl sm:text-3xl font-bold">
+                    {timeLeft.days}
+                  </div>
+                  <div className="text-[10px] sm:text-xs">{translatedDays}</div>
                 </div>
-                <div className="bg-white/20 rounded-xl px-4 py-2 min-w-[70px]">
-                  <div className="text-3xl font-bold">{timeLeft.hours}</div>
-                  <div className="text-xs">{translatedHours}</div>
+                <div className="bg-white/20 rounded-lg sm:rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 min-w-[55px] sm:min-w-[70px]">
+                  <div className="text-xl sm:text-3xl font-bold">
+                    {timeLeft.hours}
+                  </div>
+                  <div className="text-[10px] sm:text-xs">
+                    {translatedHours}
+                  </div>
                 </div>
-                <div className="bg-white/20 rounded-xl px-4 py-2 min-w-[70px]">
-                  <div className="text-3xl font-bold">{timeLeft.minutes}</div>
-                  <div className="text-xs">{translatedMinutes}</div>
+                <div className="bg-white/20 rounded-lg sm:rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 min-w-[55px] sm:min-w-[70px]">
+                  <div className="text-xl sm:text-3xl font-bold">
+                    {timeLeft.minutes}
+                  </div>
+                  <div className="text-[10px] sm:text-xs">
+                    {translatedMinutes}
+                  </div>
                 </div>
-                <div className="bg-white/20 rounded-xl px-4 py-2 min-w-[70px]">
-                  <div className="text-3xl font-bold">{timeLeft.seconds}</div>
-                  <div className="text-xs">{translatedSeconds}</div>
+                <div className="bg-white/20 rounded-lg sm:rounded-xl px-2 sm:px-4 py-1.5 sm:py-2 min-w-[55px] sm:min-w-[70px]">
+                  <div className="text-xl sm:text-3xl font-bold">
+                    {timeLeft.seconds}
+                  </div>
+                  <div className="text-[10px] sm:text-xs">
+                    {translatedSeconds}
+                  </div>
                 </div>
               </div>
-              <p className="text-sm mt-2 opacity-90 line-clamp-2">
+              <p className="text-xs sm:text-sm mt-2 opacity-90 line-clamp-2 hidden sm:block">
                 {nextHolidayTranslated.description?.substring(0, 100)}...
               </p>
-              <div className="mt-2 inline-block bg-white/20 rounded-full px-3 py-1 text-xs">
-                <Calendar className="w-3 h-3 inline mr-1" />
+              <div className="mt-2 inline-block bg-white/20 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs">
+                <Calendar className="w-2 h-2 sm:w-3 sm:h-3 inline mr-1" />
                 {nextHoliday ? formatHolidayDate(nextHoliday) : ''}
               </div>
             </div>
@@ -530,19 +518,19 @@ const Traditions: React.FC = () => {
         </div>
       )}
 
-      {/* Календарь праздников */}
+      {/* Календарь праздников - адаптивный */}
       {holidaysWithDates.length > 0 && (
-        <div className="container mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+        <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             {translatedCalendarTitle}
           </h2>
 
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mb-6 sm:mb-8">
             {translatedMonths.map((month, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedMonth(index + 1)}
-                className={`px-4 py-2 rounded-full transition-all duration-300 ${
+                className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full transition-all duration-300 text-xs sm:text-sm ${
                   selectedMonth === index + 1
                     ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -553,7 +541,7 @@ const Traditions: React.FC = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {getHolidaysByMonth(selectedMonth).map((holiday) => {
               const translatedHoliday = displayTraditions.find(
                 (t) => t.id === holiday.id,
@@ -564,13 +552,13 @@ const Traditions: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
-                  className="cursor-pointer"
+                  className="cursor-pointer h-full"
                   onClick={() =>
                     handleHolidayClick(translatedHoliday || holiday)
                   }
                 >
-                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg rounded-xl">
-                    <div className="relative h-48">
+                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg rounded-xl h-full flex flex-col">
+                    <div className="relative h-40 sm:h-48 flex-shrink-0">
                       <img
                         src={
                           holiday.image_url ||
@@ -584,26 +572,26 @@ const Traditions: React.FC = () => {
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-blue-700">
-                        <Calendar className="w-3 h-3 inline mr-1" />
+                      <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-white/90 backdrop-blur-sm rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm font-semibold text-blue-700">
+                        <Calendar className="w-2 h-2 sm:w-3 sm:h-3 inline mr-1" />
                         {formatHolidayDate(holiday)}
                       </div>
                     </div>
-                    <CardContent className="p-4">
-                      <h3 className="text-xl font-bold mb-2 line-clamp-1">
+                    <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
+                      <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2">
                         {translatedHoliday?.title || holiday.title}
                       </h3>
-                      <p className="text-gray-600 text-sm line-clamp-2">
+                      <p className="text-gray-600 text-xs sm:text-sm line-clamp-3 flex-1">
                         {translatedHoliday?.description || holiday.description}
                       </p>
                       <Button
-                        className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                        className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all duration-300 text-xs sm:text-sm py-1.5 sm:py-2"
                         onClick={() =>
                           handleHolidayClick(translatedHoliday || holiday)
                         }
                       >
                         {translatedMore}
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2" />
                       </Button>
                     </CardContent>
                   </Card>
@@ -613,73 +601,131 @@ const Traditions: React.FC = () => {
           </div>
 
           {getHolidaysByMonth(selectedMonth).length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-8 sm:py-12 text-gray-500 text-sm sm:text-base">
               {translatedNoHolidays}
             </div>
           )}
         </div>
       )}
 
-      {/* Традиции */}
-      <div className="container mx-auto px-4 py-12">
-        <Tabs value={currentTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="flex flex-wrap justify-center gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm">
+      {/* Традиции - фильтры: на ПК как было, на мобильных горизонтальная прокрутка */}
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12">
+        <div className="overflow-x-auto lg:overflow-x-visible pb-2 -mx-3 lg:mx-0 px-3 lg:px-0">
+          <div className="flex flex-nowrap lg:flex-wrap gap-2 lg:gap-3 min-w-max lg:min-w-0">
             {displayCategories.map((category) => (
-              <TabsTrigger
+              <button
                 key={category}
-                value={category}
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg px-4 py-2 transition-all"
+                onClick={() => setSelectedTab(category)}
+                className={`whitespace-nowrap rounded-full px-4 lg:px-6 py-2 lg:py-2.5 text-sm lg:text-base font-medium transition-all duration-300 ${
+                  selectedTab === category
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
                 {category}
-              </TabsTrigger>
+              </button>
             ))}
-          </TabsList>
+          </div>
+        </div>
 
-          {displayCategories.map((category) => (
-            <TabsContent key={category} value={category}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {displayTraditions
-                  .filter((t) => isCategoryMatch(t.category, category))
-                  .map((tradition) => {
-                    const Icon = getCategoryIcon(tradition.category);
-                    const displayCategory =
-                      translatedCategories[tradition.category] ||
-                      tradition.category;
-                    const originalTradition = traditions.find(
-                      (t) => t.id === tradition.id,
-                    );
-                    const holidayDate = originalTradition
-                      ? formatHolidayDate(originalTradition)
-                      : '';
-                    const hasDate = !!holidayDate;
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+              {displayTraditions
+                .filter((t) => isCategoryMatch(t.category, selectedTab))
+                .map((tradition) => {
+                  const Icon = getCategoryIcon(tradition.category);
+                  const displayCategory =
+                    translatedCategories[tradition.category] ||
+                    tradition.category;
+                  const originalTradition = originalTraditions.find(
+                    (t) => t.id === tradition.id,
+                  );
+                  const holidayDate = originalTradition
+                    ? formatHolidayDate(originalTradition)
+                    : '';
+                  const hasDate = !!holidayDate;
 
-                    return (
-                      <motion.div
-                        key={tradition.id}
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4 }}
-                      >
-                        <Card className="cursor-pointer hover:shadow-2xl transition-all duration-500 overflow-hidden group border-0 shadow-lg rounded-xl bg-white hover:-translate-y-2">
-                          <div className="relative h-52 overflow-hidden">
-                            {tradition.image_url && (
-                              <>
-                                <img
-                                  src={tradition.image_url}
-                                  alt={tradition.title}
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src =
-                                      'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800';
-                                  }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                              </>
-                            )}
-                            <div
-                              className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+                  return (
+                    <motion.div
+                      key={tradition.id}
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="h-full"
+                    >
+                      <Card className="cursor-pointer hover:shadow-2xl transition-all duration-500 overflow-hidden group border-0 shadow-lg rounded-xl bg-white hover:-translate-y-2 h-full flex flex-col">
+                        <div className="relative h-40 sm:h-48 md:h-52 flex-shrink-0 overflow-hidden">
+                          {tradition.image_url && (
+                            <img
+                              src={tradition.image_url}
+                              alt={tradition.title}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800';
+                              }}
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                          <div
+                            className="absolute top-2 left-2 sm:top-3 sm:left-3 w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg z-10"
+                            style={{
+                              backgroundColor: (() => {
+                                const cat =
+                                  tradition.category?.toLowerCase() || '';
+                                if (cat.includes('праздник')) return '#f59e0b';
+                                if (cat.includes('музык')) return '#8b5cf6';
+                                if (cat.includes('искусств')) return '#ec489a';
+                                if (cat.includes('обычай')) return '#10b981';
+                                return '#3b82f6';
+                              })(),
+                            }}
+                          >
+                            {React.createElement(Icon, {
+                              className:
+                                'w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white',
+                            })}
+                          </div>
+
+                          {hasDate && (
+                            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 backdrop-blur-sm rounded-full px-1.5 sm:px-2.5 py-0.5 text-[9px] sm:text-xs font-semibold text-blue-700 shadow-md z-10">
+                              <Calendar className="w-2 h-2 sm:w-3 sm:h-3 inline mr-0.5 sm:mr-1" />
+                              {holidayDate}
+                            </div>
+                          )}
+
+                          <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                            <h3 className="text-white text-xs sm:text-sm md:text-base font-bold leading-tight line-clamp-2">
+                              {tradition.title}
+                            </h3>
+                          </div>
+                        </div>
+                        <CardContent className="p-2.5 sm:p-4 flex-1 flex flex-col">
+                          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                            <span
+                              className="text-[9px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full"
                               style={{
                                 backgroundColor: (() => {
+                                  const cat =
+                                    tradition.category?.toLowerCase() || '';
+                                  if (cat.includes('праздник'))
+                                    return '#f59e0b20';
+                                  if (cat.includes('музык')) return '#8b5cf620';
+                                  if (cat.includes('искусств'))
+                                    return '#ec489a20';
+                                  if (cat.includes('обычай'))
+                                    return '#10b98120';
+                                  return '#3b82f620';
+                                })(),
+                                color: (() => {
                                   const cat =
                                     tradition.category?.toLowerCase() || '';
                                   if (cat.includes('праздник'))
@@ -692,91 +738,44 @@ const Traditions: React.FC = () => {
                                 })(),
                               }}
                             >
-                              {React.createElement(Icon, {
-                                className: 'w-5 h-5 text-white',
-                              })}
-                            </div>
-                            {hasDate && (
-                              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-blue-700 shadow-md z-10">
-                                <Calendar className="w-3 h-3 inline mr-1" />
-                                {holidayDate}
-                              </div>
-                            )}
+                              {displayCategory}
+                            </span>
+                            <VoiceReader
+                              text={`${tradition.title}. ${tradition.description?.substring(0, 200) || ''}`}
+                            />
                           </div>
-                          <CardContent className="p-6">
-                            <div className="flex items-center justify-between mb-3">
-                              <span
-                                className="text-sm font-medium px-2 py-0.5 rounded-full"
-                                style={{
-                                  backgroundColor: (() => {
-                                    const cat =
-                                      tradition.category?.toLowerCase() || '';
-                                    if (cat.includes('праздник'))
-                                      return '#f59e0b20';
-                                    if (cat.includes('музык'))
-                                      return '#8b5cf620';
-                                    if (cat.includes('искусств'))
-                                      return '#ec489a20';
-                                    if (cat.includes('обычай'))
-                                      return '#10b98120';
-                                    return '#3b82f620';
-                                  })(),
-                                  color: (() => {
-                                    const cat =
-                                      tradition.category?.toLowerCase() || '';
-                                    if (cat.includes('праздник'))
-                                      return '#f59e0b';
-                                    if (cat.includes('музык')) return '#8b5cf6';
-                                    if (cat.includes('искусств'))
-                                      return '#ec489a';
-                                    if (cat.includes('обычай'))
-                                      return '#10b981';
-                                    return '#3b82f6';
-                                  })(),
-                                }}
-                              >
-                                {displayCategory}
-                              </span>
-                              <VoiceReader
-                                text={`${tradition.title}. ${tradition.description?.substring(0, 200) || ''}`}
-                              />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-1">
-                              {tradition.title}
-                            </h3>
-                            <p className="text-gray-500 text-sm line-clamp-3 leading-relaxed">
-                              {tradition.description?.substring(0, 120)}...
-                            </p>
-                            <Button
-                              className="w-full mt-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                              onClick={() => handleCardClick(tradition)}
-                            >
-                              {translatedMore}
-                              <ArrowRight className="w-4 h-4 ml-2" />
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+                          <p className="text-gray-500 text-[11px] sm:text-sm line-clamp-3 leading-relaxed flex-1">
+                            {tradition.description?.substring(0, 100)}...
+                          </p>
+                          <Button
+                            className="w-full mt-2 sm:mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all duration-300 text-[11px] sm:text-sm py-1.5 sm:py-2"
+                            onClick={() => handleCardClick(tradition)}
+                          >
+                            {translatedMore}
+                            <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Диалог традиции */}
+      {/* Диалог традиции - адаптивный */}
       <AnimatePresence>
         {dialogOpen && selectedTradition && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent
-              className="max-w-3xl w-[50vw] rounded-2xl my-8"
+              className="rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl"
               style={{
-                maxWidth: '50vw',
-                width: '70vw',
+                maxWidth: '95vw',
+                width: 'auto',
                 marginTop: '5vh',
                 marginBottom: '5vh',
-                maxHeight: '70vh',
+                maxHeight: '85vh',
                 overflowY: 'auto',
               }}
             >
@@ -788,21 +787,15 @@ const Traditions: React.FC = () => {
                 exit="exit"
               >
                 {selectedTradition.image_url && (
-                  <div className="relative h-64 overflow-hidden rounded-t-2xl">
+                  <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden rounded-t-xl sm:rounded-t-2xl">
                     <img
                       src={selectedTradition.image_url}
                       alt={selectedTradition.title}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-4 left-4">
-                      <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-medium shadow-lg">
-                        {translatedCategories[selectedTradition.category] ||
-                          selectedTradition.category}
-                      </span>
-                    </div>
                     {(() => {
-                      const originalTradition = traditions.find(
+                      const originalTradition = originalTraditions.find(
                         (t) => t.id === selectedTradition.id,
                       );
                       const holidayDate = originalTradition
@@ -810,8 +803,8 @@ const Traditions: React.FC = () => {
                         : '';
                       return (
                         holidayDate && (
-                          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-blue-700 shadow-md">
-                            <Calendar className="w-3 h-3 inline mr-1" />
+                          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm font-semibold text-blue-700 shadow-md">
+                            <Calendar className="w-2 h-2 sm:w-3 sm:h-3 inline mr-1" />
                             {holidayDate}
                           </div>
                         )
@@ -820,32 +813,32 @@ const Traditions: React.FC = () => {
                   </div>
                 )}
 
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                       {selectedTradition.title}
                     </DialogTitle>
                   </DialogHeader>
 
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                          <Info className="w-4 h-4 text-blue-500" />{' '}
+                      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                        <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                          <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                           {translatedDescription}
                         </h4>
                         <VoiceReader
                           text={selectedTradition.description || ''}
                         />
                       </div>
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
                         {selectedTradition.description}
                       </p>
                     </div>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                      <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
                       <span>{translatedTraditionFromCollection}</span>
                     </div>
                   </div>
@@ -856,34 +849,34 @@ const Traditions: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Диалог праздника */}
+      {/* Диалог праздника - адаптивный */}
       <Dialog open={holidayDialogOpen} onOpenChange={setHolidayDialogOpen}>
         <DialogContent
-          className="max-w-3xl w-[50vw] rounded-2xl my-8"
+          className="rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl"
           style={{
-            maxWidth: '50vw',
-            width: '70vw',
+            maxWidth: '95vw',
+            width: 'auto',
             marginTop: '5vh',
             marginBottom: '5vh',
-            maxHeight: '70vh',
+            maxHeight: '85vh',
             overflowY: 'auto',
           }}
         >
           {selectedHoliday && (
             <>
               {selectedHoliday.image_url && (
-                <div className="relative h-56 overflow-hidden rounded-t-2xl">
+                <div className="relative h-48 sm:h-56 overflow-hidden rounded-t-xl sm:rounded-t-2xl">
                   <img
                     src={selectedHoliday.image_url}
                     alt={selectedHoliday.title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-4 left-4">
-                    <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-medium shadow-lg">
-                      <Calendar className="w-3 h-3 inline mr-1" />
+                  <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4">
+                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-[10px] sm:text-sm font-medium shadow-lg">
+                      <Calendar className="w-2 h-2 sm:w-3 sm:h-3 inline mr-1" />
                       {(() => {
-                        const originalHoliday = traditions.find(
+                        const originalHoliday = originalTraditions.find(
                           (t) => t.id === selectedHoliday.id,
                         );
                         return originalHoliday
@@ -894,24 +887,24 @@ const Traditions: React.FC = () => {
                   </div>
                 </div>
               )}
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-gray-800">
+                  <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-800">
                     {selectedHoliday.title}
                   </DialogTitle>
                 </DialogHeader>
-                <div className="mt-4">
+                <div className="mt-3 sm:mt-4">
                   <VoiceReader
                     text={selectedHoliday.description || ''}
-                    className="mb-4"
+                    className="mb-3 sm:mb-4"
                   />
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
                     {selectedHoliday.description}
                   </p>
                 </div>
-                <div className="mt-5 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                    <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
                     <span>{translatedTraditionFromCollection}</span>
                   </div>
                 </div>

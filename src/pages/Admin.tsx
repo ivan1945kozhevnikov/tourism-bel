@@ -2089,66 +2089,101 @@ const Admin: React.FC = () => {
           </Alert>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="flex flex-wrap justify-start gap-2 mb-6 bg-white p-2 rounded-xl shadow-sm border">
-            <TabsTrigger
-              value="places"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+        {/* Адаптивные вкладки - на ПК как обычно, на мобильных горизонтальная прокрутка */}
+        <div className="mb-6 overflow-x-auto lg:overflow-x-visible pb-2 -mx-3 lg:mx-0 px-3 lg:px-0">
+          <div className="flex flex-nowrap lg:flex-wrap gap-1.5 lg:gap-2 min-w-max lg:min-w-0">
+            <button
+              onClick={() => setActiveTab('places')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'places'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <MapPin className="w-4 h-4 mr-2" />
+              <MapPin className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedPlaces}
-            </TabsTrigger>
-            <TabsTrigger
-              value="tours"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+            </button>
+            <button
+              onClick={() => setActiveTab('tours')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'tours'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <Calendar className="w-4 h-4 mr-2" />
+              <Calendar className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedTours}
-            </TabsTrigger>
-            <TabsTrigger
-              value="traditions"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+            </button>
+            <button
+              onClick={() => setActiveTab('traditions')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'traditions'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <BookOpen className="w-4 h-4 mr-2" />
+              <BookOpen className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedTraditions}
-            </TabsTrigger>
-            <TabsTrigger
-              value="foods"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+            </button>
+            <button
+              onClick={() => setActiveTab('foods')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'foods'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <Utensils className="w-4 h-4 mr-2" />
+              <Utensils className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedFoods}
-            </TabsTrigger>
-            <TabsTrigger
-              value="legends"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+            </button>
+            <button
+              onClick={() => setActiveTab('legends')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'legends'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <Scroll className="w-4 h-4 mr-2" />
+              <Scroll className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedLegends}
-            </TabsTrigger>
-            <TabsTrigger
-              value="bookings"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+            </button>
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'bookings'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <Users className="w-4 h-4 mr-2" />
+              <Users className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedBookings}
-            </TabsTrigger>
-            <TabsTrigger
-              value="reviews"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+            </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'reviews'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <Star className="w-4 h-4 mr-2" />
+              <Star className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedReviews}
-            </TabsTrigger>
-            <TabsTrigger
-              value="users"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+            </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`whitespace-nowrap rounded-full px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium transition-all duration-300 flex items-center gap-1 lg:gap-2 ${
+                activeTab === 'users'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
             >
-              <UserCog className="w-4 h-4 mr-2" />
+              <UserCog className="w-3 h-3 lg:w-4 lg:h-4" />
               {translatedUsers}
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
+        </div>
 
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value={activeTab}>
             <Card className="border-0 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-gray-50 to-white border-b py-4">
@@ -2338,8 +2373,10 @@ const Admin: React.FC = () => {
                                     ))}
                                   </div>
                                 </TableCell>
-                                <TableCell className="max-w-xs truncate">
-                                  {item.text}
+                                <TableCell className="min-w-[200px] sm:min-w-[300px]">
+                                  <div className="text-sm text-gray-700 break-words whitespace-normal">
+                                    {item.text}
+                                  </div>
                                 </TableCell>
                                 <TableCell>
                                   <Badge

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { divIcon } from 'leaflet';
 import ReactDOMServer from 'react-dom/server';
@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
   Sparkles,
@@ -31,13 +30,10 @@ import {
   Landmark,
   Mountain,
   Church,
-  Volume2,
-  Play,
   Scroll,
   Crown,
   Skull,
   QrCode,
-  X,
   AlertCircle,
 } from 'lucide-react';
 import VoiceReader from '@/components/VoiceReader';
@@ -45,8 +41,6 @@ import { useTranslation } from 'react-i18next';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
-
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Стили для попапа
 const popupStyles = `
@@ -59,7 +53,8 @@ const popupStyles = `
   }
   .custom-popup .leaflet-popup-content {
     margin: 0;
-    min-width: 260px;
+    min-width: 200px;
+    max-width: 280px;
   }
   .custom-popup .leaflet-popup-tip {
     background: white;
@@ -69,6 +64,12 @@ const popupStyles = `
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  @media (max-width: 640px) {
+    .custom-popup .leaflet-popup-content {
+      min-width: 160px;
+      max-width: 200px;
+    }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
@@ -163,7 +164,7 @@ const Image3DViewer: React.FC<{
 
   return (
     <motion.div
-      className="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-gray-900 to-gray-800"
+      className="relative overflow-hidden rounded-t-xl sm:rounded-t-2xl bg-gradient-to-br from-gray-900 to-gray-800"
       style={{ perspective: 1000 }}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -171,18 +172,16 @@ const Image3DViewer: React.FC<{
     >
       {showSparkles && (
         <div className="absolute inset-0 pointer-events-none z-10">
-          {[...Array(12)].map((_, i) => (
+          {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
               initial={{
                 scale: 0,
                 opacity: 1,
-                x: Math.random() * 100 + '%',
-                y: Math.random() * 100 + '%',
               }}
               animate={{ scale: 1.5, opacity: 0 }}
               transition={{ duration: 0.8 }}
-              className="absolute w-2 h-2 bg-yellow-300 rounded-full"
+              className="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full"
               style={{
                 left: Math.random() * 100 + '%',
                 top: Math.random() * 100 + '%',
@@ -193,7 +192,7 @@ const Image3DViewer: React.FC<{
       )}
 
       <motion.div
-        className="relative h-96 cursor-grab active:cursor-grabbing overflow-hidden"
+        className="relative h-48 sm:h-64 md:h-80 lg:h-96 cursor-grab active:cursor-grabbing overflow-hidden"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -209,7 +208,7 @@ const Image3DViewer: React.FC<{
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover rounded-t-2xl"
+          className="w-full h-full object-cover rounded-t-xl sm:rounded-t-2xl"
           draggable={false}
         />
 
@@ -237,40 +236,40 @@ const Image3DViewer: React.FC<{
       </motion.div>
 
       <motion.div
-        className="absolute bottom-4 right-4 flex gap-2 bg-black/60 backdrop-blur-md rounded-full p-2"
+        className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 flex gap-1 sm:gap-2 bg-black/60 backdrop-blur-md rounded-full p-1.5 sm:p-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
         <button
           onClick={handleZoomOut}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
+          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
         >
-          <ZoomOut className="w-4 h-4 text-white" />
+          <ZoomOut className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
         </button>
         <button
           onClick={handleReset}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
+          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
         >
-          <Move className="w-4 h-4 text-white" />
+          <Move className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
         </button>
         <button
           onClick={handleZoomIn}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
+          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
         >
-          <ZoomIn className="w-4 h-4 text-white" />
+          <ZoomIn className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
         </button>
       </motion.div>
 
       <motion.div
-        className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5"
+        className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 bg-black/60 backdrop-blur-md rounded-full px-2 py-1 sm:px-3 sm:py-1.5"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <p className="text-white text-xs flex items-center gap-1">
+        <p className="text-white text-[10px] sm:text-xs flex items-center gap-1">
           <RotateCw
-            className="w-3 h-3 animate-spin"
+            className="w-2 h-2 sm:w-3 sm:h-3 animate-spin"
             style={{ animationDuration: '2s' }}
           />{' '}
           {translateHint}
@@ -330,8 +329,8 @@ const createCustomIcon = (category: string) => {
       style={{
         backgroundColor: color,
         borderRadius: '50%',
-        width: '40px',
-        height: '40px',
+        width: '36px',
+        height: '36px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -342,16 +341,16 @@ const createCustomIcon = (category: string) => {
       }}
       className="hover:scale-110 hover:shadow-xl animate-pulse-glow"
     >
-      <IconComponent size={20} color="white" strokeWidth={2} />
+      <IconComponent size={18} color="white" strokeWidth={2} />
     </div>,
   );
 
   return divIcon({
     html: iconHtml,
     className: '',
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -20],
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor: [0, -18],
   });
 };
 
@@ -551,7 +550,7 @@ const defaultLegends = [
 const Legends: React.FC = () => {
   const { i18n } = useTranslation();
   const { translateText, translateArray } = useAutoTranslate();
-  const [legends, setLegends] = useState<any[]>([]);
+  const [originalLegends, setOriginalLegends] = useState<any[]>([]);
   const [translatedLegends, setTranslatedLegends] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState<[number, number]>([
@@ -561,6 +560,7 @@ const Legends: React.FC = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [detailLegend, setDetailLegend] = useState<any>(null);
   const [selectedTab, setSelectedTab] = useState<string>('');
+  const selectedTabRef = useRef<string>('');
 
   // Состояния для QR-диалога
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
@@ -612,8 +612,8 @@ const Legends: React.FC = () => {
 
   useEffect(() => {
     const translateLegends = async () => {
-      if (legends.length > 0) {
-        const translated = await translateArray(legends, [
+      if (originalLegends.length > 0) {
+        const translated = await translateArray(originalLegends, [
           'title',
           'content',
           'origin',
@@ -623,19 +623,21 @@ const Legends: React.FC = () => {
       }
     };
     translateLegends();
-  }, [legends, i18n.language, translateArray]);
+  }, [originalLegends, i18n.language]);
 
   useEffect(() => {
     const translateCategories = async () => {
-      const uniqueCategories = [...new Set(legends.map((l) => l.category))];
+      const uniqueCategories = [
+        ...new Set(originalLegends.map((l) => l.category)),
+      ];
       const translations: Record<string, string> = {};
       for (const cat of uniqueCategories) {
         translations[cat] = await translateText(cat);
       }
       setTranslatedCategories(translations);
     };
-    if (legends.length > 0) translateCategories();
-  }, [legends, i18n.language, translateText]);
+    if (originalLegends.length > 0) translateCategories();
+  }, [originalLegends, i18n.language, translateText]);
 
   useEffect(() => {
     const translateStaticTexts = async () => {
@@ -702,27 +704,48 @@ const Legends: React.FC = () => {
     translateStaticTexts();
   }, [i18n.language, translateText]);
 
+  // Сохраняем активную вкладку
+  useEffect(() => {
+    if (selectedTab) {
+      selectedTabRef.current = selectedTab;
+    }
+  }, [selectedTab]);
+
+  // Восстанавливаем активную вкладку при смене языка
   useEffect(() => {
     if (translatedAll) {
-      if (
-        selectedTab === 'Все' ||
-        selectedTab === 'All' ||
-        selectedTab === 'Усё'
-      ) {
+      if (selectedTabRef.current && selectedTabRef.current !== '') {
+        const originalCategory = Object.keys(translatedCategories).find(
+          (key) => translatedCategories[key] === selectedTabRef.current,
+        );
+        if (originalCategory) {
+          const newTranslated = translatedCategories[originalCategory];
+          if (newTranslated) {
+            setSelectedTab(newTranslated);
+          } else {
+            setSelectedTab(translatedAll);
+          }
+        } else {
+          setSelectedTab(translatedAll);
+        }
+      } else {
         setSelectedTab(translatedAll);
       }
     }
-  }, [translatedAll, selectedTab]);
+  }, [translatedAll, translatedCategories]);
 
   const fetchLegends = async () => {
     try {
       const response = await legendsAPI.getAll();
-      if (response.data && response.data.length > 0) setLegends(response.data);
-      else setLegends(defaultLegends);
+      if (response.data && response.data.length > 0) {
+        setOriginalLegends(response.data);
+      } else {
+        setOriginalLegends(defaultLegends);
+      }
       setLoading(false);
     } catch (error) {
       console.error('Error fetching legends:', error);
-      setLegends(defaultLegends);
+      setOriginalLegends(defaultLegends);
       setLoading(false);
     }
   };
@@ -770,7 +793,7 @@ const Legends: React.FC = () => {
   };
 
   const getUniqueCategories = () => {
-    const cats = [...new Set(legends.map((l) => l.category))];
+    const cats = [...new Set(originalLegends.map((l) => l.category))];
     const translatedCats = cats.map((cat) => translatedCategories[cat] || cat);
     return [translatedAll, ...translatedCats];
   };
@@ -794,7 +817,7 @@ const Legends: React.FC = () => {
   }
 
   const displayLegends =
-    translatedLegends.length > 0 ? translatedLegends : legends;
+    translatedLegends.length > 0 ? translatedLegends : originalLegends;
   const uniqueCategories = getUniqueCategories();
   const legendsWithCoords = displayLegends.filter(
     (legend) =>
@@ -802,10 +825,6 @@ const Legends: React.FC = () => {
       legend.longitude &&
       isCategoryMatch(legend.category, selectedTab),
   );
-
-  if (!selectedTab && translatedAll) {
-    setTimeout(() => setSelectedTab(translatedAll), 100);
-  }
 
   const dialogVariants = {
     hidden: {
@@ -840,7 +859,8 @@ const Legends: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <style>{popupStyles}</style>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-20">
+      {/* Hero Section - адаптивная */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16 md:py-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYwXqPkg5y04t66SA4VCkz1eCMasWWd1ADVg&s')] bg-cover bg-center opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/50" />
@@ -850,16 +870,18 @@ const Legends: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6"
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-4 sm:mb-6"
           >
-            <Sparkles className="w-4 h-4 text-yellow-400" />
-            <span className="text-white/90 text-sm">{translatedHeroBadge}</span>
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+            <span className="text-white/90 text-xs sm:text-sm">
+              {translatedHeroBadge}
+            </span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold text-white mb-6"
+            className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6"
           >
             {translatedHeroTitle}
             <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
@@ -871,102 +893,102 @@ const Legends: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl text-white/80 max-w-3xl mx-auto"
+            className="text-base sm:text-xl text-white/80 max-w-3xl mx-auto px-4"
           >
             {translatedHeroSubtitle}
           </motion.p>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="mb-12">
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Compass className="w-5 h-5 text-white" />
-                  <span className="text-white font-medium">
-                    {translatedInteractiveMap}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-white/80 text-sm">
-                    {legendsWithCoords.length} {translatedPlacesCount}
-                  </span>
-                </div>
+      {/* Карта - адаптивная */}
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 sm:px-6 py-2.5 sm:py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                <span className="text-white font-medium text-sm sm:text-base">
+                  {translatedInteractiveMap}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-white/80 text-xs sm:text-sm">
+                  {legendsWithCoords.length} {translatedPlacesCount}
+                </span>
               </div>
             </div>
-            <div style={{ height: '500px', width: '100%' }}>
-              <MapContainer
-                center={mapCenter}
-                zoom={mapZoom}
-                style={{ height: '100%', width: '100%' }}
-                className="rounded-b-2xl"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <MapCenter center={mapCenter} zoom={mapZoom} />
-                {legendsWithCoords.map((legend) => {
-                  const { icon: IconComponent, color: iconColor } =
-                    getIconAndColor(legend.category);
-                  return (
-                    <Marker
-                      key={legend.id}
-                      position={[legend.latitude, legend.longitude]}
-                      icon={createCustomIcon(legend.category)}
-                      eventHandlers={{ click: () => handlePlaceSelect(legend) }}
-                    >
-                      <Popup className="custom-popup">
-                        <div className="p-3 max-w-xs">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div
-                              className="w-10 h-10 rounded-full flex items-center justify-center"
-                              style={{ backgroundColor: iconColor }}
-                            >
-                              {React.createElement(IconComponent, {
-                                className: 'w-5 h-5 text-white',
-                              })}
-                            </div>
-                            <h3 className="font-bold text-gray-800 text-base">
-                              {legend.title}
-                            </h3>
+          </div>
+          <div style={{ height: '400px', width: '100%' }}>
+            <MapContainer
+              center={mapCenter}
+              zoom={mapZoom}
+              style={{ height: '100%', width: '100%' }}
+              className="rounded-b-xl sm:rounded-b-2xl"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <MapCenter center={mapCenter} zoom={mapZoom} />
+              {legendsWithCoords.map((legend) => {
+                const { icon: IconComponent, color: iconColor } =
+                  getIconAndColor(legend.category);
+                return (
+                  <Marker
+                    key={legend.id}
+                    position={[legend.latitude, legend.longitude]}
+                    icon={createCustomIcon(legend.category)}
+                    eventHandlers={{ click: () => handlePlaceSelect(legend) }}
+                  >
+                    <Popup className="custom-popup">
+                      <div className="p-2 sm:p-3 max-w-[200px] sm:max-w-xs">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                          <div
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
+                            style={{ backgroundColor: iconColor }}
+                          >
+                            {React.createElement(IconComponent, {
+                              className: 'w-4 h-4 sm:w-5 sm:h-5 text-white',
+                            })}
                           </div>
-                          <p className="text-sm text-gray-600 line-clamp-3 mb-2">
-                            {legend.content?.substring(0, 100) || ''}...
-                          </p>
-                          <div className="flex items-center justify-between mt-2">
-                            <span
-                              className="text-xs px-2 py-0.5 rounded-full"
-                              style={{
-                                backgroundColor: `${iconColor}20`,
-                                color: iconColor,
-                              }}
-                            >
-                              {translatedCategories[legend.category] ||
-                                legend.category}
-                            </span>
-                            <Button
-                              size="sm"
-                              className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-xs h-7 px-3"
-                              onClick={() => handleOpenDetails(legend)}
-                            >
-                              {translatedMore}
-                            </Button>
-                          </div>
+                          <h3 className="font-bold text-gray-800 text-sm sm:text-base line-clamp-2">
+                            {legend.title}
+                          </h3>
                         </div>
-                      </Popup>
-                    </Marker>
-                  );
-                })}
-              </MapContainer>
-            </div>
+                        <p className="text-xs sm:text-sm text-gray-600 line-clamp-3 mb-2">
+                          {legend.content?.substring(0, 80) || ''}...
+                        </p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span
+                            className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: `${iconColor}20`,
+                              color: iconColor,
+                            }}
+                          >
+                            {translatedCategories[legend.category] ||
+                              legend.category}
+                          </span>
+                          <Button
+                            size="sm"
+                            className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-[10px] sm:text-xs h-6 sm:h-7 px-2 sm:px-3"
+                            onClick={() => handleOpenDetails(legend)}
+                          >
+                            {translatedMore}
+                          </Button>
+                        </div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
+            </MapContainer>
           </div>
         </div>
 
-        <div className="mb-8 flex flex-wrap justify-center gap-6">
+        {/* Легенды о категориях - адаптивные иконки */}
+        <div className="mt-6 sm:mt-8 mb-6 sm:mb-8 flex flex-wrap justify-center gap-3 sm:gap-6">
           {Object.entries(translatedCategories).map(([orig, trans]) => {
             const { icon: IconComp, color } = getIconAndColor(orig);
             return (
@@ -975,17 +997,17 @@ const Legends: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1.5 sm:gap-2"
               >
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
                   style={{ backgroundColor: color }}
                 >
                   {React.createElement(IconComp, {
-                    className: 'w-4 h-4 text-white',
+                    className: 'w-3 h-3 sm:w-4 sm:h-4 text-white',
                   })}
                 </div>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-xs sm:text-sm font-medium text-gray-700">
                   {trans}
                 </span>
               </motion.div>
@@ -993,180 +1015,170 @@ const Legends: React.FC = () => {
           })}
         </div>
 
-        <Tabs
-          value={selectedTab}
-          onValueChange={setSelectedTab}
-          className="mb-8"
-        >
-          <TabsList className="flex flex-wrap justify-center gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm">
+        {/* Фильтры - как в Traditions: на ПК как было, на мобильных горизонтальная прокрутка */}
+        <div className="overflow-x-auto lg:overflow-x-visible pb-2 -mx-3 lg:mx-0 px-3 lg:px-0">
+          <div className="flex flex-nowrap lg:flex-wrap gap-2 lg:gap-3 min-w-max lg:min-w-0">
             {uniqueCategories.map((category) => (
-              <TabsTrigger
+              <button
                 key={category}
-                value={category}
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg px-4 py-2 transition-all"
+                onClick={() => setSelectedTab(category)}
+                className={`whitespace-nowrap rounded-full px-4 lg:px-6 py-2 lg:py-2.5 text-sm lg:text-base font-medium transition-all duration-300 ${
+                  selectedTab === category
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
                 {category}
-              </TabsTrigger>
+              </button>
             ))}
-          </TabsList>
+          </div>
+        </div>
 
-          {uniqueCategories.map((category) => (
-            <TabsContent key={category} value={category}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {displayLegends
-                  .filter((l) => isCategoryMatch(l.category, category))
-                  .map((legend, idx) => {
-                    const { icon: IconComponent, color: iconColor } =
-                      getIconAndColor(legend.category);
-                    const displayCategory =
-                      translatedCategories[legend.category] || legend.category;
+        {/* Карточки легенд - адаптивные */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+          {displayLegends
+            .filter((l) => isCategoryMatch(l.category, selectedTab))
+            .map((legend, idx) => {
+              const { icon: IconComponent, color: iconColor } = getIconAndColor(
+                legend.category,
+              );
+              const displayCategory =
+                translatedCategories[legend.category] || legend.category;
 
-                    // Проверяем есть ли ссылка для QR-кода
-                    const hasQrLink = getQrUrlByLegendName(legend.title).found;
-
-                    return (
-                      <motion.div
-                        key={legend.id}
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: idx * 0.05 }}
-                        className="flex"
+              return (
+                <motion.div
+                  key={legend.id}
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: idx * 0.05 }}
+                  className="h-full"
+                >
+                  <Card className="cursor-pointer hover:shadow-2xl transition-all duration-500 overflow-hidden group border-0 shadow-lg rounded-xl bg-white hover:-translate-y-2 h-full flex flex-col">
+                    <div className="relative h-40 sm:h-48 md:h-52 overflow-hidden flex-shrink-0">
+                      {legend.image_url && (
+                        <>
+                          <img
+                            src={legend.image_url}
+                            alt={legend.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Mir_Castle_2018.jpg/800px-Mir_Castle_2018.jpg';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </>
+                      )}
+                      <div
+                        className="absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg animate-float"
+                        style={{ backgroundColor: iconColor }}
                       >
-                        <Card className="cursor-pointer hover:shadow-2xl transition-all duration-500 overflow-hidden group border-0 shadow-lg rounded-xl bg-white hover:-translate-y-2 flex flex-col w-full">
-                          <div className="relative h-52 overflow-hidden flex-shrink-0">
-                            {legend.image_url && (
-                              <>
-                                <img
-                                  src={legend.image_url}
-                                  alt={legend.title}
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src =
-                                      'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Mir_Castle_2018.jpg/800px-Mir_Castle_2018.jpg';
-                                  }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                              </>
-                            )}
-                            <div
-                              className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center shadow-lg animate-float"
-                              style={{ backgroundColor: iconColor }}
-                            >
-                              {React.createElement(IconComponent, {
-                                className: 'w-5 h-5 text-white',
-                              })}
-                            </div>
-                          </div>
-                          <CardContent className="p-6 flex-grow flex flex-col">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-3">
-                                <span
-                                  className="text-sm font-medium px-2 py-0.5 rounded-full"
-                                  style={{
-                                    backgroundColor: `${iconColor}20`,
-                                    color: iconColor,
-                                  }}
-                                >
-                                  {displayCategory}
-                                </span>
-                              </div>
-                              <VoiceReader
-                                text={`${legend.title}. ${legend.content?.substring(0, 200) || ''}`}
-                              />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2 text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-1">
-                              {legend.title}
-                            </h3>
-                            <p className="text-gray-500 text-sm line-clamp-3 leading-relaxed flex-grow">
-                              {legend.content?.substring(0, 120) || ''}...
-                            </p>
-                            {legend.origin && (
-                              <div className="flex items-center gap-1 mt-3 text-xs text-gray-400">
-                                <MapPin className="w-3 h-3" />
-                                <span className="line-clamp-1">
-                                  {legend.origin}
-                                </span>
-                              </div>
-                            )}
-                            <div className="flex gap-2 mt-4">
-                              <Button
-                                className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                                onClick={() => handleOpenDetails(legend)}
-                              >
-                                {translatedMore}
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                className="rounded-full px-4"
-                                onClick={(e) => openQrDialog(legend, e)}
-                                title="QR-код"
-                              >
-                                <QrCode className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+                        {React.createElement(IconComponent, {
+                          className:
+                            'w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white',
+                        })}
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                        <h3 className="text-white text-xs sm:text-sm md:text-base font-bold leading-tight line-clamp-2">
+                          {legend.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
+                      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                        <span
+                          className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: `${iconColor}20`,
+                            color: iconColor,
+                          }}
+                        >
+                          {displayCategory}
+                        </span>
+                        <VoiceReader
+                          text={`${legend.title}. ${legend.content?.substring(0, 200) || ''}`}
+                        />
+                      </div>
+                      <p className="text-gray-500 text-[11px] sm:text-sm line-clamp-3 leading-relaxed flex-1">
+                        {legend.content?.substring(0, 100) || ''}...
+                      </p>
+                      {legend.origin && (
+                        <div className="flex items-center gap-1 mt-2 text-[10px] sm:text-xs text-gray-400">
+                          <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                          <span className="line-clamp-1">{legend.origin}</span>
+                        </div>
+                      )}
+                      <div className="flex gap-2 mt-3 sm:mt-4">
+                        <Button
+                          className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all duration-300 text-[11px] sm:text-sm py-1.5 sm:py-2"
+                          onClick={() => handleOpenDetails(legend)}
+                        >
+                          {translatedMore}
+                          <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="rounded-full px-2 sm:px-4 py-1.5 sm:py-2"
+                          onClick={(e) => openQrDialog(legend, e)}
+                          title="QR-код"
+                        >
+                          <QrCode className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+        </div>
       </div>
 
-      {/* QR Dialog */}
+      {/* QR Dialog - адаптивный */}
       <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl text-center">
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-xl sm:rounded-2xl text-center mx-3">
           <DialogHeader>
-            <DialogTitle className="text-center">
+            <DialogTitle className="text-center text-lg sm:text-xl">
               {translatedQrTitle}
             </DialogTitle>
           </DialogHeader>
           {currentQrUrl && (
-            <div className="flex flex-col items-center py-6">
-              <div className="bg-white p-4 rounded-xl shadow-lg">
+            <div className="flex flex-col items-center py-4 sm:py-6">
+              <div className="bg-white p-3 sm:p-4 rounded-xl shadow-lg">
                 <QRCodeSVG
                   value={currentQrUrl}
-                  size={250}
+                  size={200}
                   bgColor="#ffffff"
                   fgColor="#000000"
                   level="L"
                   includeMargin={true}
                 />
               </div>
-              <p className="text-sm text-gray-500 mt-4">
+              <p className="text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4">
                 {translatedQrFor} {currentLegendName}
-              </p>
-              <p className="text-xs text-gray-400 mt-2 break-all text-center max-w-full">
-                {currentQrUrl.length > 60
-                  ? currentQrUrl.substring(0, 50) + '...'
-                  : currentQrUrl}
               </p>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* No Model Dialog */}
+      {/* No Model Dialog - адаптивный */}
       <Dialog open={noModelDialogOpen} onOpenChange={setNoModelDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl text-center">
-          <div className="flex flex-col items-center py-6">
-            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-              <AlertCircle className="w-8 h-8 text-yellow-600" />
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-xl sm:rounded-2xl text-center mx-3">
+          <div className="flex flex-col items-center py-4 sm:py-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+              <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600" />
             </div>
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-gray-800 text-center">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-gray-800 text-center">
                 {translatedNoModelTitle}
               </DialogTitle>
             </DialogHeader>
-            <p className="text-gray-500 text-center mt-2">
+            <p className="text-gray-500 text-sm sm:text-base text-center mt-2">
               {translatedNoModelDesc} "{noModelLegendName}"
             </p>
             <Button
               onClick={() => setNoModelDialogOpen(false)}
-              className="mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full px-6"
+              className="mt-5 sm:mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full px-5 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base"
             >
               Закрыть
             </Button>
@@ -1174,18 +1186,18 @@ const Legends: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Detail Dialog */}
+      {/* Detail Dialog - адаптивный */}
       <AnimatePresence>
         {detailDialogOpen && detailLegend && (
           <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
             <DialogContent
-              className="max-w-3xl w-[50vw] rounded-2xl my-8"
+              className="rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl"
               style={{
-                maxWidth: '50vw',
-                width: '70vw',
+                maxWidth: '95vw',
+                width: 'auto',
                 marginTop: '5vh',
                 marginBottom: '5vh',
-                maxHeight: '70vh',
+                maxHeight: '85vh',
                 overflowY: 'auto',
               }}
             >
@@ -1204,58 +1216,58 @@ const Legends: React.FC = () => {
                       translateHint={translated3DHint}
                     />
 
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <motion.div
                         variants={contentVariants}
                         initial="hidden"
                         animate="visible"
                       >
                         <DialogHeader>
-                          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                             {detailLegend.title}
                           </DialogTitle>
                         </DialogHeader>
                       </motion.div>
 
                       {detailLegend.origin && (
-                        <div className="flex items-center gap-1 mt-2 text-sm text-gray-500">
-                          <MapPin className="w-4 h-4" />
+                        <div className="flex items-center gap-1 mt-2 text-xs sm:text-sm text-gray-500">
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span>{detailLegend.origin}</span>
                         </div>
                       )}
 
                       <motion.div
-                        className="mt-4 space-y-4"
+                        className="mt-3 sm:mt-4 space-y-3 sm:space-y-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3, duration: 0.5 }}
                       >
                         <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                              <Info className="w-4 h-4 text-blue-500" />{' '}
+                          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                            <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                               {translatedDescription}
                             </h4>
                             <VoiceReader text={detailLegend.content || ''} />
                           </div>
-                          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                          <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
                             {detailLegend.content}
                           </p>
                         </div>
 
                         <div>
-                          <h4 className="font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                            <History className="w-4 h-4 text-blue-500" />{' '}
+                          <h4 className="font-semibold text-gray-700 flex items-center gap-2 mb-2 text-sm sm:text-base">
+                            <History className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                             {translatedHistory}
                           </h4>
-                          <p className="text-gray-600 leading-relaxed">
+                          <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
                             {detailLegend.origin}
                           </p>
                         </div>
 
                         {detailLegend.latitude && detailLegend.longitude && (
                           <div className="mt-2 p-2 bg-gray-50 rounded-lg">
-                            <p className="text-xs text-gray-500 flex items-center gap-2">
+                            <p className="text-[11px] sm:text-xs text-gray-500 flex items-center gap-2 flex-wrap">
                               <MapPin className="w-3 h-3" />
                               📍 Координаты: {detailLegend.latitude},{' '}
                               {detailLegend.longitude}
@@ -1264,7 +1276,7 @@ const Legends: React.FC = () => {
                         )}
                       </motion.div>
 
-                      <div className="flex gap-2 mt-6">
+                      <div className="flex gap-2 mt-5 sm:mt-6">
                         <motion.div
                           className="flex-1"
                           initial={{ opacity: 0, y: 20 }}
@@ -1273,9 +1285,9 @@ const Legends: React.FC = () => {
                         >
                           <Button
                             onClick={() => handleShowOnMap(detailLegend)}
-                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-lg"
                           >
-                            <MapPin className="w-4 h-4 mr-2" />{' '}
+                            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />{' '}
                             {translatedShowOnMap}
                           </Button>
                         </motion.div>
@@ -1287,9 +1299,9 @@ const Legends: React.FC = () => {
                           <Button
                             variant="outline"
                             onClick={(e) => openQrDialog(detailLegend, e)}
-                            className="rounded-full px-4"
+                            className="rounded-full px-3 sm:px-4 py-1.5 sm:py-2"
                           >
-                            <QrCode className="w-4 h-4" />
+                            <QrCode className="w-3 h-3 sm:w-4 sm:h-4" />
                           </Button>
                         </motion.div>
                       </div>

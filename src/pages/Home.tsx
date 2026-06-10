@@ -272,21 +272,34 @@ const Home: React.FC = () => {
     fetchStats();
   }, []);
 
-  // Загрузка избранных отзывов
-  useEffect(() => {
-    fetchFeaturedReviews();
-  }, []);
-
+  // ========== ИСПРАВЛЕННАЯ ЗАГРУЗКА ОТЗЫВОВ - ТОЛЬКО is_featured = 1 ==========
   const fetchFeaturedReviews = async () => {
     try {
-      const res = await reviewsAPI.getTopRated(6);
-      setFeaturedReviews(Array.isArray(res.data) ? res.data : []);
+      setReviewsLoading(true);
+      // Получаем ВСЕ отзывы
+      const response = await reviewsAPI.getAll();
+      const allReviews = Array.isArray(response.data) ? response.data : [];
+
+      // Фильтруем: только ОДОБРЕННЫЕ (is_approved = 1) И ИЗБРАННЫЕ (is_featured = 1)
+      const featuredOnly = allReviews.filter(
+        (review) => review.is_approved === 1 && review.is_featured === 1,
+      );
+
+      setFeaturedReviews(featuredOnly);
+      console.log('Избранных отзывов (is_featured=1):', featuredOnly.length);
     } catch (error) {
-      console.error('Ошибка загрузки отзывов:', error);
+      console.error('Ошибка загрузки избранных отзывов:', error);
+      setFeaturedReviews([]);
     } finally {
       setReviewsLoading(false);
     }
   };
+  // ========== КОНЕЦ ИСПРАВЛЕННОЙ ФУНКЦИИ ==========
+
+  // Загрузка избранных отзывов
+  useEffect(() => {
+    fetchFeaturedReviews();
+  }, []);
 
   // Анимация счетчика
   useEffect(() => {
@@ -562,31 +575,12 @@ const Home: React.FC = () => {
     };
   }, []);
 
-  const handleFeedbackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFeedbackLoading(true);
-    try {
-      await feedbackAPI.create({
-        user_name: feedbackForm.name,
-        user_email: feedbackForm.email,
-        subject: feedbackForm.subject,
-        message: feedbackForm.message,
-      });
-      setFeedbackSubmitted(true);
-      setFeedbackForm({ name: '', email: '', subject: '', message: '' });
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-    } finally {
-      setFeedbackLoading(false);
-    }
-  };
-
   const renderStars = (rating: number) => (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
         />
       ))}
     </div>
@@ -666,44 +660,44 @@ const Home: React.FC = () => {
           <div className="floating-1 absolute top-20 left-[10%] w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
           <div className="floating-2 absolute bottom-20 right-[15%] w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
         </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <Sparkles className="w-4 h-4 text-yellow-400" />
-                <span className="text-white/90 text-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-4 sm:mb-6 mx-auto lg:mx-0">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                <span className="text-white/90 text-xs sm:text-sm">
                   {translatedWelcome}
                 </span>
               </div>
-              <h1 className="hero-title text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
+              <h1 className="hero-title text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight">
                 {translatedTitle}
                 <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
                   {' '}
                   {translatedCountry}
                 </span>
               </h1>
-              <p className="hero-subtitle text-xl text-white/80 max-w-xl mb-10 leading-relaxed">
+              <p className="hero-subtitle text-base sm:text-lg md:text-xl text-white/80 max-w-xl mb-6 sm:mb-10 leading-relaxed mx-auto lg:mx-0">
                 {translatedSubtitle}
               </p>
-              <div className="hero-buttons flex flex-wrap gap-4">
+              <div className="hero-buttons flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
                 <Button
                   asChild
                   size="lg"
-                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-8 py-6 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
                 >
                   <Link to="/tours">
                     {translatedStart}
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                   </Link>
                 </Button>
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 px-8 py-6 text-lg font-semibold rounded-full shadow-md border-white/20"
+                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full shadow-md border-white/20"
                 >
-                  <Link to="/map" className="flex items-center">
-                    <Compass className="w-5 h-5 mr-2" />
+                  <Link to="/map" className="flex items-center justify-center">
+                    <Compass className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     {translatedExplore}
                   </Link>
                 </Button>
@@ -714,20 +708,20 @@ const Home: React.FC = () => {
                 <img
                   src="https://minskholidays.by/img/carousel/mirskii-i-nesvijskii-zamki-1.jpg"
                   alt="Мирский замок"
-                  className="w-full h-[400px] object-cover rounded-2xl"
+                  className="w-full h-[300px] xl:h-[400px] object-cover rounded-2xl"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-transparent" />
               </div>
-              <div className="absolute -bottom-6 -left-6 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                    <Camera className="w-6 h-6 text-white" />
+              <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-white/10 backdrop-blur-md rounded-xl p-3 sm:p-4 border border-white/20">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                    <Camera className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold">
+                    <p className="text-white font-semibold text-sm sm:text-base">
                       {translatedMirCastle}
                     </p>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-white/60 text-xs sm:text-sm">
                       {translatedMirSubtitle}
                     </p>
                   </div>
@@ -736,9 +730,9 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer">
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
-            <div className="w-1.5 h-3 bg-white/40 rounded-full" />
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-2 sm:w-1.5 sm:h-3 bg-white/40 rounded-full" />
           </div>
         </div>
       </section>
@@ -746,37 +740,37 @@ const Home: React.FC = () => {
       {/* Stats Section - Статистика в сине-голубых тонах */}
       <section
         ref={statsRef}
-        className="py-20 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50"
+        className="py-12 sm:py-16 md:py-20 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50"
       >
         {/* Декоративные элементы */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+          <div className="absolute top-0 left-0 w-48 h-48 sm:w-64 sm:h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+          <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
         </div>
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Заголовок */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+          <div className="text-center mb-8 sm:mb-10 md:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2 sm:mb-3">
               {translatedStatsTitle}
             </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto text-base">
+            <p className="text-gray-500 max-w-2xl mx-auto text-sm sm:text-base px-4">
               {translatedStatsSubtitle}
             </p>
-            <div className="w-20 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mx-auto mt-5" />
+            <div className="w-16 h-0.5 sm:w-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mx-auto mt-4 sm:mt-5" />
           </div>
 
           {/* Блоки статистики */}
-          <div className="flex flex-wrap justify-between gap-10 max-w-7xl mx-auto">
+          <div className="flex flex-wrap justify-center sm:justify-between gap-6 sm:gap-8 md:gap-10 max-w-7xl mx-auto">
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="stat-item group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-blue-100 w-[200px] md:w-[220px]"
+                className="stat-item group relative bg-white rounded-2xl p-5 sm:p-6 md:p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-blue-100 w-[190px] sm:w-[210px] md:w-[230px] lg:w-[250px]"
               >
-                {/* Иконка - единый сине-голубой цвет */}
-                <div className="relative z-10 mb-5">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform duration-300">
-                    <stat.icon className="w-8 h-8 text-white" />
+                {/* Иконка */}
+                <div className="relative z-10 mb-3 sm:mb-4 md:mb-5">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform duration-300">
+                    <stat.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
                 </div>
 
@@ -784,16 +778,16 @@ const Home: React.FC = () => {
                 <div className="relative z-10 text-center">
                   {statsLoading ? (
                     <div className="flex justify-center">
-                      <div className="w-20 h-10 bg-gray-200 rounded-lg animate-pulse" />
+                      <div className="w-16 h-8 sm:w-20 sm:h-10 bg-gray-200 rounded-lg animate-pulse" />
                     </div>
                   ) : (
-                    <span className="stat-value text-4xl md:text-5xl font-bold text-gray-800 block text-center">
+                    <span className="stat-value text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 block text-center">
                       {stat.value}
                     </span>
                   )}
 
-                  {/* Подпись - переводимая с центрированием */}
-                  <p className="text-gray-500 font-medium text-sm mt-3 text-center leading-tight">
+                  {/* Подпись */}
+                  <p className="text-gray-500 font-medium text-xs sm:text-sm mt-2 sm:mt-3 text-center leading-tight">
                     {stat.label}
                   </p>
                 </div>
@@ -802,8 +796,10 @@ const Home: React.FC = () => {
           </div>
 
           {/* Дополнительная информация */}
-          <div className="text-center mt-12">
-            <p className="text-gray-400 text-xs">{translatedStatsNote}</p>
+          <div className="text-center mt-8 sm:mt-10 md:mt-12">
+            <p className="text-gray-400 text-[10px] sm:text-xs">
+              {translatedStatsNote}
+            </p>
           </div>
         </div>
       </section>
@@ -811,41 +807,41 @@ const Home: React.FC = () => {
       {/* Features Section */}
       <section
         ref={featuresRef}
-        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+        className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white"
       >
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
               {translatedWhatWeOffer}
             </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">
+            <p className="text-gray-500 max-w-2xl mx-auto text-sm sm:text-base px-4">
               {translatedWhatWeOfferDesc}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7 md:gap-8">
             {features.map((feature, index) => (
               <Card
                 key={index}
                 className="feature-card group border-0 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
               >
-                <CardContent className="p-8">
+                <CardContent className="p-5 sm:p-6 md:p-8">
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 sm:mb-5 md:mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
                   >
-                    <feature.icon className="w-8 h-8 text-white" />
+                    <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-800">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-gray-800">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-500 mb-6 leading-relaxed">
+                  <p className="text-gray-500 text-sm sm:text-base mb-4 sm:mb-5 md:mb-6 leading-relaxed">
                     {feature.description}
                   </p>
                   <Link
                     to={feature.link}
-                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold group/link"
+                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold group/link text-sm sm:text-base"
                   >
                     <span>{translatedDetails}</span>
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2 group-hover/link:translate-x-1 transition-transform" />
                   </Link>
                 </CardContent>
               </Card>
@@ -855,20 +851,20 @@ const Home: React.FC = () => {
       </section>
 
       {/* Popular Destinations - Слайдер */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+      <section className="py-12 sm:py-16 md:py-20 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
               {translatedPopular}
             </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">
+            <p className="text-gray-500 max-w-2xl mx-auto text-sm sm:text-base px-4">
               {translatedPopularDesc}
             </p>
           </div>
-          <div className="relative px-4 md:px-12">
+          <div className="relative px-8 sm:px-10 md:px-12">
             <Swiper
               modules={[Navigation, Pagination, Autoplay]}
-              spaceBetween={30}
+              spaceBetween={20}
               slidesPerView={1}
               centeredSlides={true}
               navigation={{
@@ -879,27 +875,30 @@ const Home: React.FC = () => {
               autoplay={{ delay: 5000, disableOnInteraction: false }}
               loop={true}
               breakpoints={{
-                640: { slidesPerView: 1.2 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
+                480: { slidesPerView: 1.1, spaceBetween: 15 },
+                640: { slidesPerView: 1.3, spaceBetween: 20 },
+                768: { slidesPerView: 2, spaceBetween: 25 },
+                1024: { slidesPerView: 3, spaceBetween: 30 },
               }}
-              className="pb-12"
+              className="pb-10 sm:pb-12"
             >
               {translatedSliderData.map((dest, index) => (
                 <SwiperSlide key={index}>
-                  <div className="relative overflow-hidden rounded-2xl h-[400px] shadow-xl group cursor-pointer">
+                  <div className="relative overflow-hidden rounded-2xl h-[300px] sm:h-[350px] md:h-[400px] shadow-xl group cursor-pointer">
                     <img
                       src={dest.image}
                       alt={dest.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <h3 className="text-2xl font-bold mb-1">{dest.title}</h3>
-                      <p className="text-white/80 text-sm mb-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 md:p-6 text-white">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-1">
+                        {dest.title}
+                      </h3>
+                      <p className="text-white/80 text-xs sm:text-sm mb-1 sm:mb-2">
                         {dest.subtitle}
                       </p>
-                      <p className="text-white/60 text-sm line-clamp-2">
+                      <p className="text-white/60 text-xs sm:text-sm line-clamp-2">
                         {dest.description}
                       </p>
                     </div>
@@ -907,55 +906,56 @@ const Home: React.FC = () => {
                 </SwiperSlide>
               ))}
             </Swiper>
-            <button className="swiper-button-prev-custom absolute left-2 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg">
-              <ChevronLeft className="w-6 h-6 text-white" />
+            <button className="swiper-button-prev-custom absolute left-0 sm:left-1 md:left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg">
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
             </button>
-            <button className="swiper-button-next-custom absolute right-2 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg">
-              <ChevronRight className="w-6 h-6 text-white" />
+            <button className="swiper-button-next-custom absolute right-0 sm:right-1 md:right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg">
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
             </button>
           </div>
         </div>
       </section>
 
-      {/* Featured Reviews Section */}
+      {/* Featured Reviews Section - ТОЛЬКО ИЗБРАННЫЕ ОТЗЫВЫ */}
       {displayFeaturedReviews.length > 0 && (
-        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 bg-blue-100 rounded-full px-4 py-2 mb-4">
-                <Sparkles className="w-4 h-4 text-yellow-500" />
-                <span className="text-blue-800 text-sm font-medium">
+        <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10 sm:mb-12 md:mb-16">
+              <div className="inline-flex items-center gap-2 bg-blue-100 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-3 sm:mb-4">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
+                <span className="text-blue-800 text-xs sm:text-sm font-medium">
                   {translatedFeaturedReviewsTitle}
                 </span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-3 sm:mb-4">
                 {translatedFeaturedReviewsTitle}
               </h2>
-              <p className="text-gray-500 max-w-2xl mx-auto">
+              <p className="text-gray-500 max-w-2xl mx-auto text-sm sm:text-base px-4">
                 {translatedFeaturedReviewsDesc}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {displayFeaturedReviews.slice(0, 3).map((review) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+              {/* Показываем ВСЕ избранные отзывы (без slice) */}
+              {displayFeaturedReviews.map((review) => (
                 <Card
                   key={review.id}
                   className="border-0 shadow-lg rounded-2xl hover:shadow-xl transition-all"
                 >
-                  <CardContent className="p-6">
-                    <Quote className="w-8 h-8 text-blue-200 mb-4" />
-                    <p className="text-gray-600 leading-relaxed mb-4 line-clamp-4">
+                  <CardContent className="p-5 sm:p-6">
+                    <Quote className="w-6 h-6 sm:w-8 sm:h-8 text-blue-200 mb-3 sm:mb-4" />
+                    <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-3 sm:mb-4 line-clamp-4">
                       "{review.text}"
                     </p>
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                    <div className="flex items-center justify-between mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
                       <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-white" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                          <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-800">
+                          <p className="font-semibold text-gray-800 text-sm sm:text-base">
                             {review.user_name}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-[10px] sm:text-xs text-gray-400">
                             {new Date(review.created_at).toLocaleDateString()}
                           </p>
                         </div>
@@ -966,10 +966,10 @@ const Home: React.FC = () => {
                 </Card>
               ))}
             </div>
-            <div className="text-center mt-8">
+            <div className="text-center mt-8 sm:mt-10 md:mt-12">
               <Button
                 asChild
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-full px-8"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-full px-6 sm:px-8 py-2 sm:py-2.5 text-sm sm:text-base"
               >
                 <Link to="/reviews">{translatedAllReviewsBtn}</Link>
               </Button>
@@ -979,22 +979,22 @@ const Home: React.FC = () => {
       )}
 
       {/* CTA Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+      <section className="py-12 sm:py-16 md:py-20 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4 sm:mb-6">
             {translatedReady}
           </h2>
-          <p className="text-gray-500 mb-10 max-w-2xl mx-auto text-lg">
+          <p className="text-gray-500 mb-6 sm:mb-8 md:mb-10 max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-4">
             {translatedReadyDesc}
           </p>
           <Button
             asChild
             size="lg"
-            className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-10 py-6 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+            className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
           >
             <Link to="/register">
               {translatedRegister}
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
             </Link>
           </Button>
         </div>

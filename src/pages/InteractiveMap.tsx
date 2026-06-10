@@ -117,7 +117,7 @@ const Image3DViewer: React.FC<{
       transition={{ duration: 0.5 }}
     >
       <motion.div
-        className="relative h-96 cursor-grab active:cursor-grabbing overflow-hidden"
+        className="relative h-48 sm:h-64 md:h-96 cursor-grab active:cursor-grabbing overflow-hidden"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -145,39 +145,39 @@ const Image3DViewer: React.FC<{
       </motion.div>
 
       <motion.div
-        className="absolute bottom-4 right-4 flex gap-2 bg-black/50 backdrop-blur-sm rounded-full p-2"
+        className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 flex gap-1 sm:gap-2 bg-black/50 backdrop-blur-sm rounded-full p-1 sm:p-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
         <button
           onClick={handleZoomOut}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all"
+          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all"
         >
-          <ZoomOut className="w-4 h-4 text-white" />
+          <ZoomOut className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
         </button>
         <button
           onClick={handleReset}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all"
+          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all"
         >
-          <Move className="w-4 h-4 text-white" />
+          <Move className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
         </button>
         <button
           onClick={handleZoomIn}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all"
+          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-all"
         >
-          <ZoomIn className="w-4 h-4 text-white" />
+          <ZoomIn className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
         </button>
       </motion.div>
 
       <motion.div
-        className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5"
+        className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 sm:px-3 sm:py-1.5"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <p className="text-white text-xs flex items-center gap-1">
-          <RotateCw className="w-3 h-3" /> {translateHint}
+        <p className="text-white text-[10px] sm:text-xs flex items-center gap-1">
+          <RotateCw className="w-2 h-2 sm:w-3 sm:h-3" /> {translateHint}
         </p>
       </motion.div>
     </motion.div>
@@ -225,12 +225,12 @@ const VoiceButton: React.FC<{ text: string }> = ({ text }) => {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={speak}
-      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${isPlaying ? 'bg-green-500 text-white shadow-lg' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
+      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 ${isPlaying ? 'bg-green-500 text-white shadow-lg' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
     >
       {isPlaying ? (
-        <Volume2 className="w-4 h-4" />
+        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
       ) : (
-        <Play className="w-4 h-4" />
+        <Play className="w-3 h-3 sm:w-4 sm:h-4" />
       )}
     </motion.button>
   );
@@ -245,7 +245,8 @@ const popupStyles = `
   }
   .custom-popup .leaflet-popup-content {
     margin: 0;
-    min-width: 220px;
+    min-width: 200px;
+    max-width: 260px;
   }
   .custom-popup .leaflet-popup-tip {
     background: white;
@@ -255,6 +256,13 @@ const popupStyles = `
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  
+  @media (max-width: 640px) {
+    .custom-popup .leaflet-popup-content {
+      min-width: 160px;
+      max-width: 200px;
+    }
   }
 `;
 
@@ -827,7 +835,7 @@ const InteractiveMap: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-x-hidden">
       <style>{popupStyles}</style>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16 md:py-20">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Mir_Castle_2018.jpg/1920px-Mir_Castle_2018.jpg')] bg-cover bg-center opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/50" />
@@ -837,16 +845,18 @@ const InteractiveMap: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6"
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-4 sm:mb-6"
           >
-            <Sparkles className="w-4 h-4 text-yellow-400" />
-            <span className="text-white/90 text-sm">{translatedHeroBadge}</span>
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+            <span className="text-white/90 text-xs sm:text-sm">
+              {translatedHeroBadge}
+            </span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold text-white mb-6"
+            className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6"
           >
             {translatedHeroTitle}
             <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-sky-400 bg-clip-text text-transparent">
@@ -858,35 +868,35 @@ const InteractiveMap: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl text-white/80 max-w-2xl mx-auto"
+            className="text-base sm:text-xl text-white/80 max-w-2xl mx-auto px-4"
           >
             {translatedHeroSubtitle}
           </motion.p>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="relative -mt-16 mb-8 z-20">
-          <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl shadow-2xl border-0 overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="relative -mt-12 sm:-mt-16 mb-6 sm:mb-8 z-20">
+          <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl sm:rounded-2xl shadow-2xl border-0 overflow-hidden">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 text-center sm:text-left">
                   <div
-                    className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-sm ${isListening ? 'bg-red-500 animate-pulse' : isVoicePlaying ? 'bg-green-500 animate-pulse' : 'bg-white/20'}`}
+                    className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center backdrop-blur-sm flex-shrink-0 ${isListening ? 'bg-red-500 animate-pulse' : isVoicePlaying ? 'bg-green-500 animate-pulse' : 'bg-white/20'}`}
                   >
                     {isListening ? (
-                      <Mic className="w-8 h-8 text-white" />
+                      <Mic className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     ) : isVoicePlaying ? (
-                      <Volume2 className="w-8 h-8 text-white" />
+                      <Volume2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     ) : (
-                      <MicOff className="w-8 h-8 text-white" />
+                      <MicOff className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     )}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-lg sm:text-xl font-bold text-white">
                       {translatedVoiceAssistant}
                     </h3>
-                    <p className="text-blue-100">
+                    <p className="text-blue-100 text-xs sm:text-sm">
                       {isListening
                         ? translatedListening
                         : isVoicePlaying
@@ -895,40 +905,40 @@ const InteractiveMap: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {isListening ? (
                     <Button
                       onClick={stopListening}
                       variant="destructive"
-                      className="rounded-full px-6 bg-red-500 text-white h-11"
+                      className="rounded-full px-3 sm:px-6 bg-red-500 text-white h-9 sm:h-11 text-xs sm:text-sm"
                     >
-                      <MicOff className="w-4 h-4 mr-2" />{' '}
+                      <MicOff className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />{' '}
                       {translatedStopListening}
                     </Button>
                   ) : isVoicePlaying ? (
                     <Button
                       onClick={handleStopVoicePlaying}
                       variant="destructive"
-                      className="rounded-full px-6 bg-orange-500 text-white h-11"
+                      className="rounded-full px-3 sm:px-6 bg-orange-500 text-white h-9 sm:h-11 text-xs sm:text-sm"
                     >
-                      <Square className="w-4 h-4 mr-2" />{' '}
+                      <Square className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />{' '}
                       {translatedStopPlaying}
                     </Button>
                   ) : (
                     <Button
                       onClick={startListening}
-                      className="bg-white text-blue-600 hover:bg-blue-50 rounded-full px-6 shadow-lg h-11"
+                      className="bg-white text-blue-600 hover:bg-blue-50 rounded-full px-3 sm:px-6 shadow-lg h-9 sm:h-11 text-xs sm:text-sm"
                       disabled={!isSupported}
                     >
-                      <Mic className="w-4 h-4 mr-2" />{' '}
+                      <Mic className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />{' '}
                       {translatedStartListening}
                     </Button>
                   )}
                 </div>
               </div>
               {transcript && (
-                <div className="mt-4 p-3 bg-white/20 backdrop-blur-sm rounded-lg">
-                  <p className="text-sm text-white">
+                <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white/20 backdrop-blur-sm rounded-lg">
+                  <p className="text-xs sm:text-sm text-white text-center sm:text-left">
                     {translatedYouSaid}:{' '}
                     <span className="font-medium">{transcript}</span>
                   </p>
@@ -936,15 +946,17 @@ const InteractiveMap: React.FC = () => {
               )}
               {voiceResponse && (
                 <div className="mt-2 p-2 bg-white/10 backdrop-blur-sm rounded-lg">
-                  <p className="text-xs text-blue-100">{voiceResponse}</p>
+                  <p className="text-[10px] sm:text-xs text-blue-100 text-center sm:text-left">
+                    {voiceResponse}
+                  </p>
                 </div>
               )}
-              <div className="mt-4 text-sm text-blue-100">
-                <p>
+              <div className="mt-3 sm:mt-4 text-center sm:text-left">
+                <p className="text-xs sm:text-sm text-blue-100">
                   💡 <strong>{translatedExamples}:</strong> "
                   {translatedExampleMir}", "{translatedHelpCommand}"
                 </p>
-                <p className="text-xs mt-1">
+                <p className="text-blue-100 text-[10px] sm:text-xs mt-1">
                   📍 {translatedAvailablePlaces}: {places.length}
                 </p>
               </div>
@@ -952,34 +964,34 @@ const InteractiveMap: React.FC = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
           <div className="lg:col-span-2">
             <div
               id="map-container"
-              className="bg-white rounded-2xl shadow-xl overflow-hidden"
+              className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden"
             >
-              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3">
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 sm:px-6 py-2 sm:py-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Compass className="w-5 h-5 text-white" />
-                    <span className="text-white font-medium">
+                    <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    <span className="text-white font-medium text-sm sm:text-base">
                       {translatedInteractiveMap}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-white/80 text-sm">
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-white/80 text-xs sm:text-sm">
                       {places.length} {translatedPlacesCount}
                     </span>
                   </div>
                 </div>
               </div>
-              <div style={{ height: '500px', width: '100%' }}>
+              <div style={{ height: '400px', width: '100%' }}>
                 <MapContainer
                   center={mapCenter}
                   zoom={mapZoom}
                   style={{ height: '100%', width: '100%' }}
-                  className="rounded-b-2xl"
+                  className="rounded-b-xl sm:rounded-b-2xl"
                 >
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -999,39 +1011,40 @@ const InteractiveMap: React.FC = () => {
                         }}
                       >
                         <Popup className="custom-popup">
-                          <div className="p-2 min-w-[200px] max-w-[280px]">
+                          <div className="p-2 min-w-[160px] max-w-[220px] sm:min-w-[200px] sm:max-w-[280px]">
                             {place.image_url && (
                               <img
                                 src={place.image_url}
                                 alt={place.name}
-                                className="w-full h-28 object-cover rounded-lg mb-2"
+                                className="w-full h-24 sm:h-28 object-cover rounded-lg mb-2"
                               />
                             )}
-                            <h3 className="font-bold text-blue-700 text-base mb-1">
+                            <h3 className="font-bold text-blue-700 text-sm sm:text-base mb-1">
                               {place.name}
                             </h3>
                             <div className="flex items-center gap-1 mb-2">
-                              <MapPin className="w-3 h-3 text-blue-400" />
-                              <span className="text-xs text-gray-500">
+                              <MapPin className="w-2 h-2 sm:w-3 sm:h-3 text-blue-400" />
+                              <span className="text-[10px] sm:text-xs text-gray-500">
                                 {translatedCategory}
                               </span>
                             </div>
                             {place.description && (
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                                {place.description.length > 80
-                                  ? `${place.description.substring(0, 80)}...`
+                              <p className="text-[10px] sm:text-xs text-gray-600 line-clamp-2 mb-2">
+                                {place.description.length > 60
+                                  ? `${place.description.substring(0, 60)}...`
                                   : place.description}
                               </p>
                             )}
                             <Button
                               size="sm"
-                              className="w-full mt-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-xs h-7"
+                              className="w-full mt-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-[10px] sm:text-xs h-6 sm:h-7"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenDetails(place);
                               }}
                             >
-                              Подробнее <ArrowRight className="w-3 h-3 ml-1" />
+                              Подробнее{' '}
+                              <ArrowRight className="w-2 h-2 sm:w-3 sm:h-3 ml-1" />
                             </Button>
                           </div>
                         </Popup>
@@ -1044,16 +1057,16 @@ const InteractiveMap: React.FC = () => {
           </div>
 
           <div>
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden sticky top-24">
-              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <Info className="w-5 h-5" /> {translatedInfo}
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden sticky top-20 sm:top-24">
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 sm:px-6 py-3 sm:py-4">
+                <h3 className="text-white font-semibold flex items-center gap-2 text-sm sm:text-base">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5" /> {translatedInfo}
                 </h3>
-                <p className="text-blue-100 text-sm">
+                <p className="text-blue-100 text-xs sm:text-sm">
                   {translatedSelectMarker}
                 </p>
               </div>
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <AnimatePresence mode="wait">
                   {displaySelectedPlace ? (
                     <motion.div
@@ -1070,17 +1083,17 @@ const InteractiveMap: React.FC = () => {
                           <img
                             src={displaySelectedPlace.image_url}
                             alt={displaySelectedPlace.name}
-                            className="w-full h-48 object-cover rounded-lg transition-transform duration-300"
+                            className="w-full h-36 sm:h-48 object-cover rounded-lg transition-transform duration-300"
                           />
                         </motion.div>
                       )}
-                      <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                         {displaySelectedPlace.name}
                       </h2>
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="flex items-center text-blue-500 bg-blue-50 px-3 py-1 rounded-full">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          <span className="text-xs">
+                        <div className="flex items-center text-blue-500 bg-blue-50 px-2 sm:px-3 py-1 rounded-full">
+                          <MapPin className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
+                          <span className="text-[10px] sm:text-xs">
                             {translatedCategories[
                               displaySelectedPlace.category
                             ] || displaySelectedPlace.category}
@@ -1090,52 +1103,55 @@ const InteractiveMap: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                              <Info className="w-4 h-4 text-blue-500" />{' '}
+                            <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                               {translatedDescription}
                             </h4>
                             <VoiceButton
                               text={displaySelectedPlace.description || ''}
                             />
                           </div>
-                          <p className="text-gray-600 text-sm leading-relaxed">
+                          <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                             {displaySelectedPlace.description}
                           </p>
                         </div>
                         {displaySelectedPlace.history && (
                           <div>
                             <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                                <History className="w-4 h-4 text-blue-500" />{' '}
+                              <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                                <History className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                                 {translatedHistory}
                               </h4>
                               <VoiceButton
                                 text={displaySelectedPlace.history || ''}
                               />
                             </div>
-                            <p className="text-gray-600 text-sm leading-relaxed">
+                            <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                               {displaySelectedPlace.history}
                             </p>
                           </div>
                         )}
                       </div>
                       <Button
-                        className="w-full mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full"
+                        className="w-full mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm sm:text-base"
                         onClick={() => handleOpenDetails(selectedPlace!)}
                       >
-                        <ArrowRight className="w-4 h-4 mr-2" /> {translatedMore}
+                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />{' '}
+                        {translatedMore}
                       </Button>
                     </motion.div>
                   ) : (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-center py-12"
+                      className="text-center py-8 sm:py-12"
                     >
-                      <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <MapPin className="w-10 h-10 text-blue-400" />
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <MapPin className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400" />
                       </div>
-                      <p className="text-gray-400">{translatedSelectMarker}</p>
+                      <p className="text-gray-400 text-sm sm:text-base">
+                        {translatedSelectMarker}
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -1144,25 +1160,25 @@ const InteractiveMap: React.FC = () => {
           </div>
         </div>
 
-        <div id="places-list" className="mt-12">
-          <div className="mb-6 p-4 bg-white rounded-xl shadow-md border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
+        <div id="places-list" className="mt-8 sm:mt-12">
+          <div className="mb-6 p-3 sm:p-4 bg-white rounded-xl shadow-md border border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-3">
               <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-500" />
-                <span className="font-semibold text-gray-700">
+                <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">
                   {translatedFilterByCategory}
                 </span>
               </div>
-              <span className="text-sm text-gray-500">
+              <span className="text-xs sm:text-sm text-gray-500">
                 {filteredPlaces.length} {translatedPlacesCount}
               </span>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {uniqueCategories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedTab(category)}
-                  className={`rounded-full px-4 py-2 text-sm transition-all ${selectedTab === category ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  className={`rounded-full px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm transition-all ${selectedTab === category ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                   {category}
                 </button>
@@ -1170,8 +1186,8 @@ const InteractiveMap: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
               {showAllPlaces ? translatedAllPlaces : translatedPopularPlaces}
             </h2>
             <div className="flex gap-2">
@@ -1179,23 +1195,24 @@ const InteractiveMap: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => setShowAllPlaces(false)}
-                  className="text-blue-600"
+                  className="text-blue-600 text-sm sm:text-base"
                 >
-                  <X className="w-4 h-4 mr-1" /> {translatedHide}
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> {translatedHide}
                 </Button>
               ) : (
                 <Button
                   variant="ghost"
                   onClick={() => setShowAllPlaces(true)}
-                  className="text-blue-600"
+                  className="text-blue-600 text-sm sm:text-base"
                 >
-                  {translatedViewAll} <ArrowRight className="w-4 h-4 ml-1" />
+                  {translatedViewAll}{' '}
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                 </Button>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {displayedPlacesList.map((place) => (
               <motion.div
                 key={place.id}
@@ -1211,7 +1228,7 @@ const InteractiveMap: React.FC = () => {
                   onClick={() => handlePlaceSelect(place)}
                 >
                   <CardContent className="p-0">
-                    <div className="relative overflow-hidden h-36">
+                    <div className="relative overflow-hidden h-28 sm:h-36">
                       {place.image_url && (
                         <motion.img
                           src={place.image_url}
@@ -1224,13 +1241,13 @@ const InteractiveMap: React.FC = () => {
                         />
                       )}
                     </div>
-                    <div className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold text-gray-800">
+                    <div className="p-3 sm:p-4">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate">
                             {place.name}
                           </h3>
-                          <p className="text-sm text-blue-500">
+                          <p className="text-blue-500 text-xs sm:text-sm truncate">
                             {translatedCategories[place.category] ||
                               place.category}
                           </p>
@@ -1242,7 +1259,7 @@ const InteractiveMap: React.FC = () => {
                       <Button
                         variant="link"
                         size="sm"
-                        className="mt-2 p-0 text-blue-600"
+                        className="mt-2 p-0 text-blue-600 text-xs sm:text-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleOpenDetails(place);
@@ -1263,13 +1280,13 @@ const InteractiveMap: React.FC = () => {
         {detailDialogOpen && (
           <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
             <DialogContent
-              className="max-w-3xl w-[50vw] rounded-2xl my-8"
+              className="rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl"
               style={{
-                maxWidth: '50vw',
-                width: '70vw',
+                maxWidth: '95vw',
+                width: 'auto',
                 marginTop: '5vh',
                 marginBottom: '5vh',
-                maxHeight: '70vh',
+                maxHeight: '85vh',
                 overflowY: 'auto',
               }}
             >
@@ -1287,14 +1304,14 @@ const InteractiveMap: React.FC = () => {
                       title={displayDetailPlace.name}
                       translateHint={translated3DHint}
                     />
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <motion.div
                         variants={contentVariants}
                         initial="hidden"
                         animate="visible"
                       >
                         <DialogHeader>
-                          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                             {displayDetailPlace.name}
                           </DialogTitle>
                         </DialogHeader>
@@ -1306,41 +1323,41 @@ const InteractiveMap: React.FC = () => {
                         transition={{ delay: 0.3, duration: 0.5 }}
                       >
                         <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                              <Info className="w-4 h-4 text-blue-500" />{' '}
+                          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                            <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                              <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                               {translatedDescription}
                             </h4>
                             <VoiceButton
                               text={displayDetailPlace.description || ''}
                             />
                           </div>
-                          <p className="text-gray-600 leading-relaxed">
+                          <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
                             {displayDetailPlace.description}
                           </p>
                         </div>
                         {displayDetailPlace.history && (
                           <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                                <History className="w-4 h-4 text-blue-500" />{' '}
+                            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                              <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                                <History className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                                 {translatedHistory}
                               </h4>
                               <VoiceButton
                                 text={displayDetailPlace.history || ''}
                               />
                             </div>
-                            <p className="text-gray-600 leading-relaxed">
+                            <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
                               {displayDetailPlace.history}
                             </p>
                           </div>
                         )}
                         <div>
-                          <h4 className="font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                            <MapPin className="w-4 h-4 text-blue-500" />{' '}
+                          <h4 className="font-semibold text-gray-700 flex items-center gap-2 mb-2 text-sm sm:text-base">
+                            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
                             {translatedCoordinates}
                           </h4>
-                          <p className="text-gray-600">
+                          <p className="text-gray-600 text-sm sm:text-base">
                             {translatedLatitude}: {displayDetailPlace.latitude},{' '}
                             {translatedLongitude}:{' '}
                             {displayDetailPlace.longitude}
@@ -1355,9 +1372,9 @@ const InteractiveMap: React.FC = () => {
                       >
                         <Button
                           onClick={() => handleShowOnMap(detailPlace!)}
-                          className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full px-6 py-2"
+                          className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base"
                         >
-                          <MapPin className="w-4 h-4 mr-2" />{' '}
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />{' '}
                           {translatedShowOnMap}
                         </Button>
                       </motion.div>

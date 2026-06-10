@@ -11,11 +11,105 @@ const AccessibilityWidget: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(false);
   let tooltipTimeout: NodeJS.Timeout;
 
-  const languages = [
-    { code: 'ru', name: 'Русский', flag: 'RU', tooltip: 'Русский язык' },
-    { code: 'en', name: 'English', flag: 'EN', tooltip: 'English language' },
-    { code: 'be', name: 'Беларуская', flag: 'BY', tooltip: 'Беларуская мова' },
-  ];
+  // Получение переведенных текстов в зависимости от текущего языка
+  const getTranslatedTexts = () => {
+    const currentLang = i18n.language;
+
+    if (currentLang === 'en') {
+      return {
+        title: 'Accessibility Version',
+        highContrast: 'High contrast',
+        fontSize: 'Font size',
+        reset: 'Reset',
+        resetAll: 'Reset all settings',
+        languageChanged: (lang: string) => `Language changed to ${lang}`,
+        contrastOn: 'High contrast enabled',
+        contrastOff: 'High contrast disabled',
+        fontSizeChanged: (size: number) => `Font size changed to ${size}%`,
+        resetAllMsg: 'All settings reset',
+        languages: [
+          {
+            code: 'ru',
+            name: 'Русский',
+            flag: 'RU',
+            tooltip: 'Russian language',
+          },
+          {
+            code: 'en',
+            name: 'English',
+            flag: 'EN',
+            tooltip: 'English language',
+          },
+          {
+            code: 'be',
+            name: 'Беларуская',
+            flag: 'BY',
+            tooltip: 'Belarusian language',
+          },
+        ],
+      };
+    } else if (currentLang === 'be') {
+      return {
+        title: 'Версія для слабавідушчых',
+        highContrast: 'Высокі кантраст',
+        fontSize: 'Памер шрыфта',
+        reset: 'Скінуць',
+        resetAll: 'Скінуць усе налады',
+        languageChanged: (lang: string) => `Мова зменена на ${lang}`,
+        contrastOn: 'Высокі кантраст уключаны',
+        contrastOff: 'Высокі кантраст выключаны',
+        fontSizeChanged: (size: number) => `Памер шрыфта зменены на ${size}%`,
+        resetAllMsg: 'Усе налады скінуты',
+        languages: [
+          { code: 'ru', name: 'Русский', flag: 'RU', tooltip: 'Русская мова' },
+          {
+            code: 'en',
+            name: 'English',
+            flag: 'EN',
+            tooltip: 'Англійская мова',
+          },
+          {
+            code: 'be',
+            name: 'Беларуская',
+            flag: 'BY',
+            tooltip: 'Беларуская мова',
+          },
+        ],
+      };
+    } else {
+      // Русский по умолчанию
+      return {
+        title: 'Версия для слабовидящих',
+        highContrast: 'Высокий контраст',
+        fontSize: 'Размер шрифта',
+        reset: 'Сброс',
+        resetAll: 'Сбросить все настройки',
+        languageChanged: (lang: string) => `Язык изменен на ${lang}`,
+        contrastOn: 'Высокий контраст включен',
+        contrastOff: 'Высокий контраст выключен',
+        fontSizeChanged: (size: number) => `Размер шрифта изменен на ${size}%`,
+        resetAllMsg: 'Все настройки сброшены',
+        languages: [
+          { code: 'ru', name: 'Русский', flag: 'RU', tooltip: 'Русский язык' },
+          {
+            code: 'en',
+            name: 'English',
+            flag: 'EN',
+            tooltip: 'English language',
+          },
+          {
+            code: 'be',
+            name: 'Беларуская',
+            flag: 'BY',
+            tooltip: 'Беларуская мова',
+          },
+        ],
+      };
+    }
+  };
+
+  const texts = getTranslatedTexts();
+  const languages = texts.languages;
 
   const showTooltipMessage = (message: string) => {
     setTooltipText(message);
@@ -46,7 +140,7 @@ const AccessibilityWidget: React.FC = () => {
     i18n.changeLanguage(langCode);
     localStorage.setItem('language', langCode);
     setShowMenu(false);
-    showTooltipMessage(`Язык изменен на ${langName}`);
+    showTooltipMessage(texts.languageChanged(langName));
   };
 
   const toggleHighContrast = () => {
@@ -55,11 +149,11 @@ const AccessibilityWidget: React.FC = () => {
     if (newValue) {
       document.documentElement.classList.add('high-contrast');
       localStorage.setItem('high-contrast', 'true');
-      showTooltipMessage('Высокий контраст включен');
+      showTooltipMessage(texts.contrastOn);
     } else {
       document.documentElement.classList.remove('high-contrast');
       localStorage.setItem('high-contrast', 'false');
-      showTooltipMessage('Высокий контраст выключен');
+      showTooltipMessage(texts.contrastOff);
     }
     setShowMenu(false);
   };
@@ -68,7 +162,7 @@ const AccessibilityWidget: React.FC = () => {
     setFontSize(size);
     document.documentElement.style.fontSize = `${size}%`;
     localStorage.setItem('font-size', size.toString());
-    showTooltipMessage(`Размер шрифта изменен на ${size}%`);
+    showTooltipMessage(texts.fontSizeChanged(size));
     setShowMenu(false);
   };
 
@@ -79,7 +173,7 @@ const AccessibilityWidget: React.FC = () => {
     document.documentElement.style.fontSize = '100%';
     localStorage.removeItem('high-contrast');
     localStorage.removeItem('font-size');
-    showTooltipMessage('Все настройки сброшены');
+    showTooltipMessage(texts.resetAllMsg);
     setShowMenu(false);
   };
 
@@ -117,13 +211,13 @@ const AccessibilityWidget: React.FC = () => {
       <button
         onClick={() => setShowMenu(!showMenu)}
         className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30"
-        aria-label="Версия для слабовидящих"
-        title="Версия для слабовидящих"
+        aria-label={texts.title}
+        title={texts.title}
       >
         <Eye className="w-5 h-5" />
       </button>
 
-      {/* Выпадающее меню настроек - исправлено позиционирование */}
+      {/* Выпадающее меню настроек */}
       {showMenu && (
         <>
           <div
@@ -133,7 +227,7 @@ const AccessibilityWidget: React.FC = () => {
           <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl z-50 p-5 border border-gray-100">
             <h4 className="font-semibold text-gray-800 flex items-center gap-2 mb-4 pb-2 border-b">
               <Eye className="w-5 h-5 text-blue-500" />
-              Версия для слабовидящих
+              {texts.title}
             </h4>
             <div className="space-y-3">
               {/* Мобильный выбор языка */}
@@ -164,7 +258,7 @@ const AccessibilityWidget: React.FC = () => {
               >
                 <span className="flex items-center gap-2">
                   <Contrast className="w-5 h-5" />
-                  <span>Высокий контраст</span>
+                  <span>{texts.highContrast}</span>
                 </span>
                 {isHighContrast && <Check className="w-5 h-5 text-green-600" />}
               </button>
@@ -173,7 +267,7 @@ const AccessibilityWidget: React.FC = () => {
               <div className="p-3 bg-gray-50 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Type className="w-5 h-5" />
-                  <span>Размер шрифта</span>
+                  <span>{texts.fontSize}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -195,7 +289,7 @@ const AccessibilityWidget: React.FC = () => {
                     onClick={() => changeFontSize(100)}
                     className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm hover:bg-blue-200"
                   >
-                    Сброс
+                    {texts.reset}
                   </button>
                 </div>
               </div>
@@ -206,7 +300,7 @@ const AccessibilityWidget: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 p-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700"
               >
                 <Globe className="w-4 h-4" />
-                <span>Сбросить все настройки</span>
+                <span>{texts.resetAll}</span>
               </button>
             </div>
           </div>
