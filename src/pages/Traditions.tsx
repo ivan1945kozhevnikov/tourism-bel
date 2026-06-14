@@ -65,6 +65,25 @@ const Traditions: React.FC = () => {
   const [nextHoliday, setNextHoliday] = useState<Tradition | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Mobile dialog state
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileDialogOpen, setMobileDialogOpen] = useState(false);
+  const [mobileTradition, setMobileTradition] = useState<Tradition | null>(
+    null,
+  );
+  const [mobileHolidayDialogOpen, setMobileHolidayDialogOpen] = useState(false);
+  const [mobileHoliday, setMobileHoliday] = useState<Tradition | null>(null);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Статические переводы
   const [translatedHeroBadge, setTranslatedHeroBadge] = useState(
     'Культурное наследие',
@@ -349,13 +368,23 @@ const Traditions: React.FC = () => {
   }, [i18n.language, translateText]);
 
   const handleCardClick = (tradition: Tradition) => {
-    setSelectedTradition(tradition);
-    setDialogOpen(true);
+    if (isMobile) {
+      setMobileTradition(tradition);
+      setMobileDialogOpen(true);
+    } else {
+      setSelectedTradition(tradition);
+      setDialogOpen(true);
+    }
   };
 
   const handleHolidayClick = (holiday: Tradition) => {
-    setSelectedHoliday(holiday);
-    setHolidayDialogOpen(true);
+    if (isMobile) {
+      setMobileHoliday(holiday);
+      setMobileHolidayDialogOpen(true);
+    } else {
+      setSelectedHoliday(holiday);
+      setHolidayDialogOpen(true);
+    }
   };
 
   const getCategoryIcon = (category: string) => {
@@ -411,6 +440,18 @@ const Traditions: React.FC = () => {
     }
   }, [translatedAll]);
 
+  // Блокировка скролла при открытом модальном окне
+  useEffect(() => {
+    if ((mobileDialogOpen || mobileHolidayDialogOpen) && isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileDialogOpen, mobileHolidayDialogOpen, isMobile]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -430,7 +471,6 @@ const Traditions: React.FC = () => {
     ? displayTraditions.find((t) => t.id === nextHoliday.id) || nextHoliday
     : null;
 
-  // Анимация для диалога
   const dialogVariants = {
     hidden: { opacity: 0, scale: 0.9, y: 20 },
     visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3 } },
@@ -546,6 +586,7 @@ const Traditions: React.FC = () => {
               const translatedHoliday = displayTraditions.find(
                 (t) => t.id === holiday.id,
               );
+              const holidayToShow = translatedHoliday || holiday;
               return (
                 <motion.div
                   key={holiday.id}
@@ -553,9 +594,6 @@ const Traditions: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
                   className="cursor-pointer h-full"
-                  onClick={() =>
-                    handleHolidayClick(translatedHoliday || holiday)
-                  }
                 >
                   <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg rounded-xl h-full flex flex-col">
                     <div className="relative h-40 sm:h-48 flex-shrink-0">
@@ -578,17 +616,20 @@ const Traditions: React.FC = () => {
                       </div>
                     </div>
                     <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
-                      <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2">
-                        {translatedHoliday?.title || holiday.title}
-                      </h3>
+                      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                        <h3 className="text-base sm:text-lg font-bold mb-1 sm:mb-2 line-clamp-2 flex-1">
+                          {holidayToShow.title}
+                        </h3>
+                        <VoiceReader
+                          text={`${holidayToShow.title}. ${holidayToShow.description?.substring(0, 200) || ''}`}
+                        />
+                      </div>
                       <p className="text-gray-600 text-xs sm:text-sm line-clamp-3 flex-1">
-                        {translatedHoliday?.description || holiday.description}
+                        {holidayToShow.description?.substring(0, 100)}...
                       </p>
                       <Button
                         className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full transition-all duration-300 text-xs sm:text-sm py-1.5 sm:py-2"
-                        onClick={() =>
-                          handleHolidayClick(translatedHoliday || holiday)
-                        }
+                        onClick={() => handleHolidayClick(holidayToShow)}
                       >
                         {translatedMore}
                         <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2" />
@@ -764,7 +805,7 @@ const Traditions: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* Диалог традиции - адаптивный */}
+      {/* Desktop Dialog */}
       <AnimatePresence>
         {dialogOpen && selectedTradition && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -849,7 +890,7 @@ const Traditions: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Диалог праздника - адаптивный */}
+      {/* Desktop Holiday Dialog */}
       <Dialog open={holidayDialogOpen} onOpenChange={setHolidayDialogOpen}>
         <DialogContent
           className="rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl"
@@ -913,6 +954,175 @@ const Traditions: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Mobile Tradition Dialog - Center */}
+      <AnimatePresence>
+        {mobileDialogOpen && mobileTradition && (
+          <Dialog open={mobileDialogOpen} onOpenChange={setMobileDialogOpen}>
+            <DialogContent
+              className="rounded-xl sm:rounded-2xl p-0 overflow-hidden"
+              style={{
+                maxWidth: '90vw',
+                width: '90vw',
+                maxHeight: '90vh',
+                height: 'auto',
+                overflowY: 'auto',
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                padding: 0,
+              }}
+            >
+              <motion.div
+                key={mobileTradition.id}
+                variants={dialogVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="flex flex-col"
+              >
+                {mobileTradition.image_url && (
+                  <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden rounded-t-xl sm:rounded-t-2xl">
+                    <img
+                      src={mobileTradition.image_url}
+                      alt={mobileTradition.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    {(() => {
+                      const originalTradition = originalTraditions.find(
+                        (t) => t.id === mobileTradition.id,
+                      );
+                      const holidayDate = originalTradition
+                        ? formatHolidayDate(originalTradition)
+                        : '';
+                      return (
+                        holidayDate && (
+                          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-sm font-semibold text-blue-700 shadow-md">
+                            <Calendar className="w-2 h-2 sm:w-3 sm:h-3 inline mr-1" />
+                            {holidayDate}
+                          </div>
+                        )
+                      );
+                    })()}
+                  </div>
+                )}
+
+                <div className="p-4 sm:p-6 overflow-y-auto max-h-[40vh]">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                      {mobileTradition.title}
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                        <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                          <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
+                          {translatedDescription}
+                        </h4>
+                        <VoiceReader text={mobileTradition.description || ''} />
+                      </div>
+                      <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                        {mobileTradition.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                      <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+                      <span>{translatedTraditionFromCollection}</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Holiday Dialog - Center */}
+      <AnimatePresence>
+        {mobileHolidayDialogOpen && mobileHoliday && (
+          <Dialog
+            open={mobileHolidayDialogOpen}
+            onOpenChange={setMobileHolidayDialogOpen}
+          >
+            <DialogContent
+              className="rounded-xl sm:rounded-2xl p-0 overflow-hidden"
+              style={{
+                maxWidth: '90vw',
+                width: '90vw',
+                maxHeight: '90vh',
+                height: 'auto',
+                overflowY: 'auto',
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                padding: 0,
+              }}
+            >
+              <motion.div
+                key={mobileHoliday.id}
+                variants={dialogVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="flex flex-col"
+              >
+                {mobileHoliday.image_url && (
+                  <div className="relative h-48 sm:h-56 overflow-hidden rounded-t-xl sm:rounded-t-2xl">
+                    <img
+                      src={mobileHoliday.image_url}
+                      alt={mobileHoliday.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4">
+                      <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-[10px] sm:text-sm font-medium shadow-lg">
+                        <Calendar className="w-2 h-2 sm:w-3 sm:h-3 inline mr-1" />
+                        {(() => {
+                          const originalHoliday = originalTraditions.find(
+                            (t) => t.id === mobileHoliday.id,
+                          );
+                          return originalHoliday
+                            ? formatHolidayDate(originalHoliday)
+                            : '';
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div className="p-4 sm:p-6 overflow-y-auto max-h-[40vh]">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-800">
+                      {mobileHoliday.title}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-3 sm:mt-4">
+                    <VoiceReader
+                      text={mobileHoliday.description || ''}
+                      className="mb-3 sm:mb-4"
+                    />
+                    <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                      {mobileHoliday.description}
+                    </p>
+                  </div>
+                  <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+                      <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+                      <span>{translatedTraditionFromCollection}</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

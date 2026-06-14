@@ -6,7 +6,7 @@
     "booking_date": "2026-05-28",
     "participants": 13,
     "total_price": 910,
-    "status": "pending",
+    "status": "cancelled",
     "created_at": "2026-05-25 10:23:06.820",
     "departure_location": "Моё местоположение"
   },
@@ -17,8 +17,41 @@
     "booking_date": "2026-06-11",
     "participants": 1,
     "total_price": 75,
-    "status": "pending",
+    "status": "cancelled",
     "departure_location": "Моё местоположение",
     "created_at": "2026-06-10 14:54:00.175"
+  },
+  {
+    "id": 5004,
+    "user_id": 1,
+    "tour_id": 3039,
+    "booking_date": "2026-06-25",
+    "participants": 3,
+    "total_price": 270,
+    "status": "confirmed",
+    "departure_location": "Гомель",
+    "created_at": "2026-06-15 10:04:30.529"
+  },
+  {
+    "id": 5005,
+    "user_id": 1,
+    "tour_id": 3029,
+    "booking_date": "2026-06-27",
+    "participants": 4,
+    "total_price": 280,
+    "status": "confirmed",
+    "departure_location": "Могилёв",
+    "created_at": "2026-06-15 10:14:15.331"
+  },
+  {
+    "id": 5006,
+    "user_id": 1,
+    "tour_id": 3033,
+    "booking_date": "2026-06-27",
+    "participants": 12,
+    "total_price": 900,
+    "status": "confirmed",
+    "departure_location": "Витебск",
+    "created_at": "2026-06-24 15:46:18.065"
   }
 ]

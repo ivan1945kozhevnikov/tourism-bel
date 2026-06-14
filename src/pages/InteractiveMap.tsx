@@ -289,6 +289,48 @@ const InteractiveMap: React.FC = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('');
 
+  // Mobile fullscreen dialog
+  const [mobileFullscreenOpen, setMobileFullscreenOpen] = useState(false);
+  const [mobileFullscreenPlace, setMobileFullscreenPlace] =
+    useState<Place | null>(null);
+  const [translatedMobileFullscreenPlace, setTranslatedMobileFullscreenPlace] =
+    useState<Place | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Translate mobile fullscreen place
+  useEffect(() => {
+    if (mobileFullscreenPlace) {
+      translateObject(mobileFullscreenPlace, [
+        'name',
+        'description',
+        'history',
+        'category',
+      ]).then(setTranslatedMobileFullscreenPlace);
+    }
+  }, [mobileFullscreenPlace, i18n.language]);
+
+  // Блокировка скролла при открытом модальном окне на мобильных
+  useEffect(() => {
+    if (mobileFullscreenOpen && isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileFullscreenOpen, isMobile]);
+
   // Голосовой помощник
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -759,12 +801,19 @@ const InteractiveMap: React.FC = () => {
   };
 
   const handleOpenDetails = (place: Place) => {
-    setDetailPlace(place);
-    setDetailDialogOpen(true);
+    // На мобильных открываем центрированное модальное окно
+    if (isMobile) {
+      setMobileFullscreenPlace(place);
+      setMobileFullscreenOpen(true);
+    } else {
+      setDetailPlace(place);
+      setDetailDialogOpen(true);
+    }
   };
 
   const handleShowOnMap = (place: Place) => {
     setDetailDialogOpen(false);
+    setMobileFullscreenOpen(false);
     setSelectedPlace(place);
     setMapCenter([place.latitude, place.longitude]);
     setMapZoom(12);
@@ -794,6 +843,8 @@ const InteractiveMap: React.FC = () => {
   const displayPlaces = translatedPlaces.length > 0 ? translatedPlaces : places;
   const displaySelectedPlace = translatedSelectedPlace || selectedPlace;
   const displayDetailPlace = translatedDetailPlace || detailPlace;
+  const displayMobileFullscreenPlace =
+    translatedMobileFullscreenPlace || mobileFullscreenPlace;
   const uniqueCategories = getUniqueCategories();
   const filteredPlaces = displayPlaces.filter((place) =>
     isCategoryMatch(place.category, selectedTab),
@@ -1225,7 +1276,14 @@ const InteractiveMap: React.FC = () => {
               >
                 <Card
                   className={`cursor-pointer hover:shadow-xl transition-all duration-300 border-0 shadow-md rounded-xl overflow-hidden ${selectedPlace?.id === place.id ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
-                  onClick={() => handlePlaceSelect(place)}
+                  onClick={() => {
+                    if (isMobile) {
+                      setMobileFullscreenPlace(place);
+                      setMobileFullscreenOpen(true);
+                    } else {
+                      handlePlaceSelect(place);
+                    }
+                  }}
                 >
                   <CardContent className="p-0">
                     <div className="relative overflow-hidden h-28 sm:h-36">
@@ -1276,6 +1334,118 @@ const InteractiveMap: React.FC = () => {
         </div>
       </div>
 
+      {/* Mobile Centered Dialog - как в Traditions */}
+      <AnimatePresence>
+        {mobileFullscreenOpen && displayMobileFullscreenPlace && (
+          <Dialog
+            open={mobileFullscreenOpen}
+            onOpenChange={setMobileFullscreenOpen}
+          >
+            <DialogContent
+              className="rounded-xl sm:rounded-2xl p-0 overflow-hidden"
+              style={{
+                maxWidth: '90vw',
+                width: '90vw',
+                maxHeight: '90vh',
+                height: 'auto',
+                overflowY: 'auto',
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                padding: 0,
+              }}
+            >
+              <motion.div
+                key={displayMobileFullscreenPlace.id}
+                variants={dialogVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="flex flex-col"
+              >
+                <Image3DViewer
+                  imageUrl={displayMobileFullscreenPlace.image_url || ''}
+                  title={displayMobileFullscreenPlace.name}
+                  translateHint={translated3DHint}
+                />
+                <div className="p-4 sm:p-6 overflow-y-auto max-h-[40vh]">
+                  <motion.div
+                    variants={contentVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <DialogHeader>
+                      <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        {displayMobileFullscreenPlace.name}
+                      </DialogTitle>
+                    </DialogHeader>
+                  </motion.div>
+                  <motion.div
+                    className="mt-4 space-y-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                        <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                          <Info className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
+                          {translatedDescription}
+                        </h4>
+                        <VoiceButton
+                          text={displayMobileFullscreenPlace.description || ''}
+                        />
+                      </div>
+                      <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                        {displayMobileFullscreenPlace.description}
+                      </p>
+                    </div>
+                    {displayMobileFullscreenPlace.history && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                          <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm sm:text-base">
+                            <History className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
+                            {translatedHistory}
+                          </h4>
+                          <VoiceButton
+                            text={displayMobileFullscreenPlace.history || ''}
+                          />
+                        </div>
+                        <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                          {displayMobileFullscreenPlace.history}
+                        </p>
+                      </div>
+                    )}
+                    <div>
+                      <h4 className="font-semibold text-gray-700 flex items-center gap-2 mb-2 text-sm sm:text-base">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />{' '}
+                        {translatedCoordinates}
+                      </h4>
+                      <p className="text-gray-600 text-sm sm:text-base">
+                        {translatedLatitude}:{' '}
+                        {displayMobileFullscreenPlace.latitude},{' '}
+                        {translatedLongitude}:{' '}
+                        {displayMobileFullscreenPlace.longitude}
+                      </p>
+                    </div>
+                  </motion.div>
+                  <div className="mt-6">
+                    <Button
+                      onClick={() => handleShowOnMap(mobileFullscreenPlace!)}
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full px-4 sm:px-6 py-2 text-sm sm:text-base"
+                    >
+                      <MapPin className="w-4 h-4 mr-2" /> {translatedShowOnMap}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Detail Dialog */}
       <AnimatePresence>
         {detailDialogOpen && (
           <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>

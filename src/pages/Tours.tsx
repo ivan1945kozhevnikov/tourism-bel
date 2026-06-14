@@ -804,14 +804,14 @@ const Tours: React.FC = () => {
                             {booking.participants}
                           </span>
                         </div>
-                        <div className="flex justify-between">
+                        {/* <div className="flex justify-between">
                           <span className="text-gray-500">
                             {translatedTotal}
                           </span>
                           <span className="text-gray-700 font-semibold">
                             {booking.total_price} BYN
                           </span>
-                        </div>
+                        </div> */}
                         <div className="flex justify-between items-center">
                           <span className="text-gray-500">
                             {translatedStatus}
@@ -860,9 +860,9 @@ const Tours: React.FC = () => {
                         alt={tour.title}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
+                      {/* <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
                         {tour.price} BYN
-                      </div>
+                      </div> */}
                     </div>
                   )}
                   <CardHeader className="pb-2 flex-shrink-0">
@@ -1303,14 +1303,14 @@ const Tours: React.FC = () => {
                       </div>
                     )}
                     <div className="border-t pt-2 mt-2">
-                      <div className="flex justify-between">
+                      {/* <div className="flex justify-between">
                         <span className="font-semibold">
                           {translatedTotalLabel}
                         </span>
                         <span className="font-bold text-blue-600">
                           {calculateTotalPrice()} BYN
                         </span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

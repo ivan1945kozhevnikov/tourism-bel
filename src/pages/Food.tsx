@@ -55,6 +55,18 @@ const FoodPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('');
   const selectedTabRef = useRef<string>('');
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Статические переводы
   const [translatedHeroBadge, setTranslatedHeroBadge] = useState(
     'Кулинарное наследие',
@@ -701,18 +713,37 @@ const FoodPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Detail Dialog - адаптивный */}
+      {/* Detail Dialog - адаптивный для телефонов и планшетов */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent
-          className="rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl"
-          style={{
-            maxWidth: '95vw',
-            width: 'auto',
-            marginTop: '5vh',
-            marginBottom: '5vh',
-            maxHeight: '85vh',
-            overflowY: 'auto',
-          }}
+          className={
+            isMobile
+              ? 'rounded-xl sm:rounded-2xl p-0 overflow-hidden'
+              : 'rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl'
+          }
+          style={
+            isMobile
+              ? {
+                  maxWidth: '90vw',
+                  width: '90vw',
+                  maxHeight: '90vh',
+                  height: 'auto',
+                  overflowY: 'auto',
+                  position: 'fixed',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  padding: 0,
+                }
+              : {
+                  maxWidth: '95vw',
+                  width: 'auto',
+                  marginTop: '5vh',
+                  marginBottom: '5vh',
+                  maxHeight: '85vh',
+                  overflowY: 'auto',
+                }
+          }
         >
           {selectedFood && (
             <>
@@ -732,7 +763,10 @@ const FoodPage: React.FC = () => {
                   </div>
                 </div>
               )}
-              <div className="p-4 sm:p-6">
+              <div
+                className="p-4 sm:p-6"
+                style={isMobile ? { maxHeight: '50vh', overflowY: 'auto' } : {}}
+              >
                 <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
                   {selectedFood.name}
                 </h2>
@@ -833,37 +867,41 @@ const FoodPage: React.FC = () => {
           )}
           {gameShowResult && (
             <div className="p-4 sm:p-6 pt-12 sm:pt-6 text-center">
-              <div
-                className={`p-3 sm:p-4 rounded-lg mb-3 sm:mb-4 ${
-                  gameMessageType === 'success'
-                    ? 'bg-green-50 border border-green-200'
-                    : 'bg-red-50 border border-red-200'
-                }`}
-              >
-                {gameMessageType === 'success' ? (
-                  <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-500 mx-auto mb-2" />
-                ) : (
-                  <X className="w-8 h-8 sm:w-10 sm:h-10 text-red-500 mx-auto mb-2" />
-                )}
-                <p
-                  className={`text-sm sm:text-base font-semibold ${
-                    gameMessageType === 'success'
-                      ? 'text-green-700'
-                      : 'text-red-700'
-                  }`}
-                >
-                  {gameMessage}
-                </p>
-              </div>
               {gameCurrentQuestion + 1 < gameTotalQuestions ? (
-                <Button
-                  onClick={nextQuestion}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm sm:text-base py-2"
-                >
-                  <ArrowRight className="w-4 h-4 mr-2" /> {translatedGameNext}
-                </Button>
+                // Результат отдельного вопроса
+                <div>
+                  <div
+                    className={`p-3 sm:p-4 rounded-lg mb-3 sm:mb-4 ${
+                      gameMessageType === 'success'
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    {gameMessageType === 'success' ? (
+                      <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-500 mx-auto mb-2" />
+                    ) : (
+                      <X className="w-8 h-8 sm:w-10 sm:h-10 text-red-500 mx-auto mb-2" />
+                    )}
+                    <p
+                      className={`text-sm sm:text-base font-semibold ${
+                        gameMessageType === 'success'
+                          ? 'text-green-700'
+                          : 'text-red-700'
+                      }`}
+                    >
+                      {gameMessage}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={nextQuestion}
+                    className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm sm:text-base py-2"
+                  >
+                    <ArrowRight className="w-4 h-4 mr-2" /> {translatedGameNext}
+                  </Button>
+                </div>
               ) : (
-                <div className="space-y-3">
+                // Финальный результат игры
+                <div className="space-y-4">
                   <div className="p-4 sm:p-6 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl">
                     <div
                       className={`text-5xl sm:text-6xl mb-3 ${finalMessage.color}`}
@@ -883,18 +921,18 @@ const FoodPage: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Button
                       onClick={resetGame}
                       variant="outline"
-                      className="w-full rounded-full text-sm sm:text-base py-2 order-2 sm:order-1"
+                      className="w-full rounded-full text-sm sm:text-base py-2 border-gray-300 hover:bg-gray-50"
                     >
-                      <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />{' '}
+                      <RefreshCw className="w-4 h-4 mr-2" />{' '}
                       {translatedGamePlayAgain}
                     </Button>
                     <Button
                       onClick={closeGame}
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm sm:text-base py-2 order-1 sm:order-2"
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm sm:text-base py-2"
                     >
                       {translatedGameClose}
                     </Button>

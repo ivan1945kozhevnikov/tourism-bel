@@ -562,6 +562,18 @@ const Legends: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('');
   const selectedTabRef = useRef<string>('');
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Состояния для QR-диалога
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [currentQrUrl, setCurrentQrUrl] = useState('');
@@ -1186,20 +1198,39 @@ const Legends: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Detail Dialog - адаптивный */}
+      {/* Detail Dialog - адаптивный для телефонов и планшетов */}
       <AnimatePresence>
         {detailDialogOpen && detailLegend && (
           <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
             <DialogContent
-              className="rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl"
-              style={{
-                maxWidth: '95vw',
-                width: 'auto',
-                marginTop: '5vh',
-                marginBottom: '5vh',
-                maxHeight: '85vh',
-                overflowY: 'auto',
-              }}
+              className={
+                isMobile
+                  ? 'rounded-xl sm:rounded-2xl p-0 overflow-hidden'
+                  : 'rounded-xl sm:rounded-2xl my-4 sm:my-8 mx-3 sm:mx-auto w-[calc(100%-1.5rem)] sm:w-auto max-w-[95vw] sm:max-w-3xl'
+              }
+              style={
+                isMobile
+                  ? {
+                      maxWidth: '90vw',
+                      width: '90vw',
+                      maxHeight: '90vh',
+                      height: 'auto',
+                      overflowY: 'auto',
+                      position: 'fixed',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      padding: 0,
+                    }
+                  : {
+                      maxWidth: '95vw',
+                      width: 'auto',
+                      marginTop: '5vh',
+                      marginBottom: '5vh',
+                      maxHeight: '85vh',
+                      overflowY: 'auto',
+                    }
+              }
             >
               <AnimatePresence mode="wait">
                 {detailLegend && (
@@ -1216,7 +1247,12 @@ const Legends: React.FC = () => {
                       translateHint={translated3DHint}
                     />
 
-                    <div className="p-4 sm:p-6">
+                    <div
+                      className="p-4 sm:p-6"
+                      style={
+                        isMobile ? { maxHeight: '50vh', overflowY: 'auto' } : {}
+                      }
+                    >
                       <motion.div
                         variants={contentVariants}
                         initial="hidden"
